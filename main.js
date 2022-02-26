@@ -1,7 +1,9 @@
 "use strict";
 require('dotenv').config();
-const command = require("./command");
 
+let lobby = "";
+
+const command = require("./command");
 const tmi = require('tmi.js');
 const client = new tmi.Client({
 	options: { debug: true, messagesLogLevel: "info" },
@@ -22,7 +24,17 @@ client.on('message', (channel, tags, message, self) => {
 
 	if(message.startsWith('!')) {
 		const reply = command(tags, message);
-		if (reply){
+		
+		if(reply === "GetLobbyInfo") {
+			//get lobby info
+			client.say(channel, "Lobby Info: " + lobby);
+		}
+		else if(reply === "SetLobby") {
+			//set lobby
+			lobby = message.substring(7);
+			client.say(channel, "Lobby is set to: " + lobby);
+		}
+		else if (reply != ""){
 			// お兄ちゃんに何か返すときだけ、返信しちゃお！
 			client.say(channel, reply);
 		}

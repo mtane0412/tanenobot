@@ -7,9 +7,10 @@ const command = (tags, message) => {
   const username = tags.username;
   const displayName = tags['display-name'];
 
+  console.log(`arg: ${arg}`)
+  //if result contains a argument, result returns true
   if (result) {
     const [cmd, arg] = [result[1].toLowerCase(), result[2]];
-    console.log(`arg: ${arg}`)
 
     if(cmd === '!hello') {
       return `you said "${arg}"`
@@ -19,6 +20,11 @@ const command = (tags, message) => {
       const channelName = arg.toLowerCase();
       return `https://www.twitch.tv/${channelName}`
     }
+    
+    if(lobby === "!lobby")
+    {
+      return "SetLobby" + lobby;
+    }
 
   } else {
     // 引数がないときだよ、お兄ちゃん
@@ -27,6 +33,9 @@ const command = (tags, message) => {
       console.log('hello');
       return `hello ${username}`
     }
+
+    if (cmd === '!lobby')
+      return 'GetLobbyInfo';
 
     if(cmd === '!discord') {
       return `Discordサーバーでぜひお話しましょう！ Why not join our discord server? Let's enjoy talking with us! https://discord.gg/F76ervs3sw`
