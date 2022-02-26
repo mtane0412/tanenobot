@@ -52,6 +52,10 @@ const command = (tags, message) => {
       return `諦めちゃダメだ！ https://www.shuzo.co.jp/message/`
     }
 
+    if (cmd === '!github') {
+      return `https://github.com/mtane0412/tanenobot`
+    }
+
     return message
   }
 }
