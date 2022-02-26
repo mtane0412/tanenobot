@@ -1,4 +1,7 @@
+"use strict";
 require('dotenv').config();
+const command = require("./command");
+
 const tmi = require('tmi.js');
 const client = new tmi.Client({
 	options: { debug: true, messagesLogLevel: "info" },
@@ -14,15 +17,14 @@ const client = new tmi.Client({
 });
 client.connect().catch(console.error);
 client.on('message', (channel, tags, message, self) => {
-    console.log(channel);
-    console.log(tags);
-    console.log(message);
-    console.log(self);
 	if(self) return; // ignore mesasges from tanenobot
-	if(message.toLowerCase() === '!hello') {
-		client.say(channel, `@${tags.username}, heya!`);
-	}
-	if(message.toLowerCase() === '!discord') {
-		client.say(channel, `Discordサーバーでぜひお話しましょう！ Why not join our discord server? Let's enjoy talking with us! https://discord.gg/F76ervs3sw`);
+
+
+	if(message.startsWith('!')) {
+		const reply = command(tags, message);
+		if (reply){
+			// お兄ちゃんに何か返すときだけ、返信しちゃお！
+			client.say(channel, reply);
+		}
 	}
 });
