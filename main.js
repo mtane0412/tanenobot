@@ -19,12 +19,13 @@ client.connect().catch(console.error);
 client.on('message', (channel, tags, message, self) => {
 	if(self) return; // ignore mesasges from tanenobot
 
-
 	if(message.startsWith('!')) {
 		const response = command(tags, message);
 		if (response){
 			// お兄ちゃんに何か返すときだけ、返信しちゃお！
 			client.say(channel, response);
 		}
+	} else {
+		return
 	}
 });
