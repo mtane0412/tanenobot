@@ -1,7 +1,7 @@
 "use strict";
 const ribenchi = require("./ribenchi");
 
-const command = (tags, message) => {
+const command = (tags, message, storage) => {
   const result = message.split(' ');
   const cmd = result[0]; // ここに !cmd が入るよ
   const username = tags.username;
@@ -10,12 +10,12 @@ const command = (tags, message) => {
 
   if (cmd === '!hello') {
     if (result.length === 1) {
-      response = `hello ${username}`
+      response = `hello ${username}`;
     } else {
       // テスト用
       result.shift(); // 先頭の !command を削除
       const text = result.join(' ');
-      response = `@${username} ${text}`
+      response = `@${username} ${text}`;
     }
   }
 
@@ -36,21 +36,36 @@ const command = (tags, message) => {
   }
 
   if(cmd === '!ribenchi') {
-    response = ribenchi
+    response = ribenchi;
   }
 
   if (cmd === '!shuzo') {
-    response = `諦めちゃダメだ！ https://www.shuzo.co.jp/message/`
+    response = `諦めちゃダメだ！ https://www.shuzo.co.jp/message/`;
   }
 
   if (cmd === '!github') {
-    response = `https://github.com/mtane0412/tanenobot`
+    response = `https://github.com/mtane0412/tanenobot`;
   }
 
   if(cmd === '!so') {
     // 第1引数を常にchannel nameと考えるよ！
     const channelName = result[1].toLowerCase();
-    response = `https://www.twitch.tv/${channelName}`
+    response = `https://www.twitch.tv/${channelName}`;
+  }
+
+  if(cmd === '!lobby') {
+    if(result.length === 1) {
+      // 引数なしの場合は storage.lobby の値を返す
+      response = storage.lobby;
+    } else if (result.length > 1 && username === 'tanenob' ) {
+      result.shift(); // 先頭の !command を削除
+      const text = result.join(' '); // 引数をすべて結合
+      storage.lobby = text;
+      response = `@${username} lobby情報を登録したよ！`;
+    } else {
+      // たねのぶ以外は登録できない
+      response = null;
+    }
   }
 
   // お兄ちゃんへの返事を言うよ！
