@@ -21,10 +21,10 @@ client.on('message', (channel, tags, message, self) => {
 
 
 	if(message.startsWith('!')) {
-		const reply = command(tags, message);
-		if (reply){
+		const response = command(tags, message);
+		if (response){
 			// お兄ちゃんに何か返すときだけ、返信しちゃお！
-			client.say(channel, reply);
+			client.say(channel, response);
 		}
 	}
 });
