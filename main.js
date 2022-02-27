@@ -15,7 +15,7 @@ const client = new tmi.Client({
 	},
 	channels: [ 'tanenob' ]
 });
-let storage = {};
+const storage = {};
 client.connect().catch(console.error);
 client.on('message', (channel, tags, message, self) => {
 	if(self) return; // ignore mesasges from tanenobot
