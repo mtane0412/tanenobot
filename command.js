@@ -1,11 +1,11 @@
 "use strict";
 const ribenchi = require("./ribenchi");
 
-const command = (tags, message, storage) => {
+const command = (msg, message, storage) => {
   const result = message.split(' ');
   const cmd = result[0]; // ここに !cmd が入るよ
-  const username = tags.username;
-  const displayName = tags['display-name'];
+  const username = msg.userInfo.userName;
+  const displayName = msg.userInfo.displayName;
   let response;
 
   if (cmd === '!hello') {
