@@ -6,8 +6,8 @@
     "@twurple/eventsub": "^5.0.18",
     "dotenv": "^16.0.0",
     "install": "^0.13.0",
+    "node-wav-player": "^0.2.0",
     "npm": "^8.5.2",
-    "play-sound": "^1.1.5",
     "tmi.js": "^1.8.5"
   }
 }

@@ -56,11 +56,11 @@ const command = (msg, message, storage) => {
   if(cmd === '!lobby') {
     if(result.length === 1) {
       // 引数なしの場合は storage.lobby の値を返す
-      response = storage.lobby;
+      response = storage.lobbyInfo;
     } else if (result.length > 1 && username === 'tanenob' ) {
       result.shift(); // 先頭の !command を削除
       const text = result.join(' '); // 引数をすべて結合
-      storage.lobby = text;
+      storage.lobbyInfo = text;
       response = `@${username} lobby情報を登録したよ！`;
     } else {
       // たねのぶ以外は登録できない
