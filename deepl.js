@@ -9,7 +9,9 @@ const isJapanese = (text) => {
 }
 
 const deepl = (message) => {
+    // デフォルト翻訳先言語
     let targetLang = 'JA';
+
     // 日本語判定(中国語巻き込み)
     if(isJapanese(message)) {
         targetLang = 'EN';    

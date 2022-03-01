@@ -6,6 +6,20 @@ const deepl = require("./deepl");
 const fs = require('fs').promises;
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
+const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
+
+const isOnlyClap = (text) => {
+    // 8888判定
+    return !text.replace(/[\s8８]/g, '');
+};
+
+const isOnlyUrl = (text) => {
+    // url判定
+    const url = text.trim();
+    const regex = /^https?:\/\/[\S]*$/;
+    console.log(`isOnlyUrl: ${regex.test(url)}`);
+    return regex.test(url)
+}
 
 async function main() {
     const clientId = process.env.CLIENT_ID;
@@ -58,19 +72,29 @@ async function main() {
             }
         }
 
-        let textsWithoutEmotes = "";
-        msg.parseEmotes().forEach(obj => {
-            if (obj.type === 'text') {
-                textsWithoutEmotes += obj.text;
-            }
-        });
+        if (!ignoreUsers.includes(user)) {
+            // テキストのみを抽出
+            let textsWithoutEmotes = "";
+            msg.parseEmotes().forEach(obj => {
+                if (obj.type === 'text') {
+                    textsWithoutEmotes += obj.text;
+                }
+            });
 
-        deepl(textsWithoutEmotes).then(result => {
-            chatClient.say(channel, `${result.data.translations[0].text}`);
-        }).catch(error => {
-            console.error(error)
-            return null
-        });
+            // 拍手のみは除外
+            if (isOnlyClap(textsWithoutEmotes)) return
+
+            // URLのみは除外
+            if (isOnlyUrl(textsWithoutEmotes)) return
+
+            // DeepL翻訳
+            deepl(textsWithoutEmotes).then(result => {
+                chatClient.say(channel, `(${user}) ${result.data.translations[0].text}`);
+            }).catch(error => {
+                console.error(error)
+                return null
+            });
+        }
 
 
         
