@@ -2,6 +2,7 @@
 require('dotenv').config();
 const command = require("./command");
 const doorbellPlay = require("./doorbellPlay");
+const deepl = require("./deepl");
 const fs = require('fs').promises;
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
@@ -34,9 +35,10 @@ async function main() {
         }
     };
 
-    chatClient.onMessage((channel, user, message, msg) => {
+    chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName ? `${msg.userInfo.displayName}(${user})` : user;
         console.log(`[${channel}] ${chatter}: ${message}`);
+        //console.log(msg.parseEmotes());
         if (!storage.userInfo.has(user)) {
             storage.addUserInfo(user, msg.userInfo.displayName);
             doorbellPlay(user);
@@ -44,7 +46,7 @@ async function main() {
 
         // Cheer処理
         if(msg.isCheer) {
-            chatClient.say(channel, `Thanks for the ${msg.bits} bits!! ${chatter}`)
+            return chatClient.say(channel, `Thanks for the ${msg.bits} bits!! ${chatter}`)
         }
 
         // !command処理
@@ -52,11 +54,26 @@ async function main() {
             const response = command(msg, message, storage);
             if (response){
                 // お兄ちゃんに何か返すときだけ、返信しちゃお！
-                chatClient.say(channel, response);
+                return chatClient.say(channel, response);
             }
-        } else {
-            return
         }
+
+        let textsWithoutEmotes = "";
+        msg.parseEmotes().forEach(obj => {
+            if (obj.type === 'text') {
+                textsWithoutEmotes += obj.text;
+            }
+        });
+
+        deepl(textsWithoutEmotes).then(result => {
+            chatClient.say(channel, `${result.data.translations[0].text}`);
+        }).catch(error => {
+            console.error(error)
+            return null
+        });
+
+
+        
     });
 
     chatClient.onSub((channel, user, subInfo, msg) => {
