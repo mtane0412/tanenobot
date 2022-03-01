@@ -23,22 +23,31 @@ async function main() {
 
     const storage = {
         lobbyInfo: "",
-        chatUsers: new Set()
+        userInfo: new Map(),
+        addUserInfo(username, displayName) {
+            this.userInfo.set(username,
+                {
+                    username: username,
+                    displayName: displayName,
+                    url: `https://www.twitch.tv/${username}`
+                })
+        }
     };
 
     chatClient.onMessage((channel, user, message, msg) => {
-        const displayName = msg.userInfo.displayName;
-        console.log(`[${channel}] ${user}: ${message}`);
-        if (!storage.chatUsers.has(user)) {
-            storage.chatUsers.add(user);
+        const chatter = msg.userInfo.displayName ? `${msg.userInfo.displayName}(${user})` : user;
+        console.log(`[${channel}] ${chatter}: ${message}`);
+        if (!storage.userInfo.has(user)) {
+            storage.addUserInfo(user, msg.userInfo.displayName);
             doorbellPlay(user);
+        } 
+
+        // Cheer処理
+        if(msg.isCheer) {
+            chatClient.say(channel, `Thanks for the ${msg.bits} bits!! ${chatter}`)
         }
-        if (message === '!ping') {
-            chatClient.say(channel, 'Pong!');
-        } else if (message === '!dice') {
-            const diceRoll = Math.floor(Math.random() * 6) + 1;
-            chatClient.say(channel, `@${user} rolled a ${diceRoll}`)
-        }
+
+        // !command処理
         if(message.startsWith('!')) {
             const response = command(msg, message, storage);
             if (response){
@@ -50,17 +59,34 @@ async function main() {
         }
     });
 
-    chatClient.onSub((channel, user) => {
+    chatClient.onSub((channel, user, subInfo, msg) => {
+        storage.addUserInfo(user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel!`);
     });
     
-    chatClient.onResub((channel, user, subInfo) => {
+    chatClient.onResub((channel, user, subInfo, msg) => {
+        storage.addUserInfo(user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel for a total of ${subInfo.months} months!`);
     });
     
-    chatClient.onSubGift((channel, user, subInfo) => {
+    chatClient.onSubGift((channel, user, subInfo, msg) => {
+        storage.addUserInfo(user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to ${subInfo.gifter} for gifting a subscription to ${user}!`);
     });
+
+
+    chatClient.onRaid((channel, user, raidInfo, msg) => {
+        storage.addUserInfo(user, msg.userInfo.displayName);
+        const raider = raidInfo.displayName ? `${raidInfo.displayName}(${user})` : user;
+        chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers`);
+    });
+
+    chatClient.onHosted((channel, byChannel, auto, viewers) => {
+        if (!auto){
+            chatClient.say(channel, `we got hosted by ${byChannel} with ${viewers} viewers`);
+        }
+    });
+
 }
 
 main();
