@@ -17,7 +17,6 @@ const isOnlyUrl = (text) => {
     // url判定
     const url = text.trim();
     const regex = /^https?:\/\/[\S]*$/;
-    console.log(`isOnlyUrl: ${regex.test(url)}`);
     return regex.test(url)
 }
 
@@ -49,10 +48,9 @@ async function main() {
         }
     };
 
-    chatClient.onMessage(async (channel, user, message, msg) => {
-        const chatter = msg.userInfo.displayName ? `${msg.userInfo.displayName}(${user})` : user;
+    chatClient.onMessage((channel, user, message, msg) => {
+        const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
-        //console.log(msg.parseEmotes());
         if (!storage.userInfo.has(user)) {
             storage.addUserInfo(user, msg.userInfo.displayName);
             doorbellPlay(user);
