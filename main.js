@@ -8,6 +8,10 @@ const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 
+const isOnlySpace = (text) => {
+    // 空白判定
+    return !text.trim()
+};
 const isOnlyClap = (text) => {
     // 8888判定
     return !text.replace(/[\s8８]/g, '');
@@ -78,6 +82,9 @@ async function main() {
                     textsWithoutEmotes += obj.text;
                 }
             });
+
+            // 空白のみ＝エモートのみは除外
+            if (isOnlySpace(textsWithoutEmotes)) return
 
             // 拍手のみは除外
             if (isOnlyClap(textsWithoutEmotes)) return
