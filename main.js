@@ -7,7 +7,6 @@ const fs = require('fs').promises;
 const { ApiClient } =  require('@twurple/api');
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
-const api = require('tmi.js/lib/api');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 
 const main = async()=> {
@@ -30,21 +29,15 @@ const main = async()=> {
         enableTranslate: false,
         lobbyInfo: "",
         userInfo: new Map(),
+        nameTable: new Map(),
         addUserInfo(userId, username, displayName) {
+            this.nameTable.set(displayName, username);
             this.userInfo.set(username,
                 {
                     userId: userId,
                     username: username,
                     displayName: displayName
                 })
-            if (username !== displayName) {
-                this.userInfo.set(displayName,
-                    {
-                        userId: userId,
-                        username: username,
-                        displayName: displayName
-                    })
-            }
         }
     };
 
@@ -90,9 +83,6 @@ const main = async()=> {
                 return null
             });
         }
-
-
-        
     });
 
     chatClient.onSub((channel, user, subInfo, msg) => {

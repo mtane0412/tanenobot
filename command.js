@@ -55,13 +55,14 @@ const command = async (msg, message, storage, apiClient) => {
 
   if(cmd === '!so') {
     // @マークがついていたら除外する
-    let soUser = result[1].toLowerCase().replace('@', '');
-    // 第1引数を常にchannel nameと考えるよ！
-    const channelName = storage.userInfo.get(soUser).username;
-    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUser).userId);
+    let soUser = result[1].replace('@', '');
+    // 表示名テーブルを参照して存在すればusernameに置き換える
+    const soUserName = storage.nameTable.get(soUser) ? storage.nameTable.get(soUser) : soUser.toLowerCase() ;
+    // const channelName = storage.userInfo.get(soUsername).username;
+    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName).userId);
     const gameName = await channelInfo.gameName;
     const title = await channelInfo.title;
-    response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${channelName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
+    response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${soUserName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
   }
 
   if(cmd === '!lobby') {
