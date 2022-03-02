@@ -8,6 +8,11 @@ const { ApiClient } =  require('@twurple/api');
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
+const bouyomiConnect = require('./bouyomi');
+const bouyomiServer = {
+    host: '127.0.0.1',
+    port: '50001'
+};
 
 const main = async()=> {
     const clientId = process.env.CLIENT_ID;
@@ -53,6 +58,7 @@ const main = async()=> {
     chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
+        
         if (!storage.userInfo.has(user)) {
             storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
             doorbellPlay(user);
@@ -72,14 +78,18 @@ const main = async()=> {
             }
         }
 
+        // テキストのみを抽出
+        let textsWithoutEmotes = "";
+        msg.parseEmotes().forEach(obj => {
+            if (obj.type === 'text') {
+                textsWithoutEmotes += obj.text;
+            }
+        });
+
+        bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
+
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
-            // テキストのみを抽出
-            let textsWithoutEmotes = "";
-            msg.parseEmotes().forEach(obj => {
-                if (obj.type === 'text') {
-                    textsWithoutEmotes += obj.text;
-                }
-            });
+
 
             // 除外判定に引っかかったら翻訳しない
             if (exclude(textsWithoutEmotes)) return
