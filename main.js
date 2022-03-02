@@ -2,29 +2,13 @@
 require('dotenv').config();
 const command = require("./command");
 const doorbellPlay = require("./doorbellPlay");
-const deepl = require("./deepl");
+const {exclude, deepl} = require("./deepl");
 const fs = require('fs').promises;
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 // WEBSTER_DICTIONARY_API_KEY
 // WEBSTER_THESAURUS_API_KEY
-const isOnlySpace = (text) => {
-    // 空白判定
-    return !text.trim()
-};
-
-const isOnlyClap = (text) => {
-    // 8888判定
-    return !text.replace(/[\s8８]/g, '');
-};
-
-const isOnlyUrl = (text) => {
-    // url判定
-    const url = text.trim();
-    const regex = /^https?:\/\/[\S]*$/;
-    return regex.test(url)
-}
 
 async function main() {
     const clientId = process.env.CLIENT_ID;
@@ -86,14 +70,8 @@ async function main() {
                 }
             });
 
-            // 空白のみ＝エモートのみは除外
-            if (isOnlySpace(textsWithoutEmotes)) return
-
-            // 拍手のみは除外
-            if (isOnlyClap(textsWithoutEmotes)) return
-
-            // URLのみは除外
-            if (isOnlyUrl(textsWithoutEmotes)) return
+            // 除外判定に引っかかったら翻訳しない
+            if (exclude(textsWithoutEmotes)) return
 
             // DeepL翻訳
             deepl(textsWithoutEmotes).then(result => {
