@@ -36,8 +36,15 @@ const main = async()=> {
                 {
                     userId: userId,
                     username: username,
-                    displayName: displayName
+                    displayName: displayName,
+                    cooldownTranslate: false
                 })
+        },
+        addCooltimeTranslate(username) {
+            this.userInfo.get(username).cooldownTranslate = true;
+            setTimeout(()=> {
+                this.userInfo.get(username).cooldownTranslate = false; 
+            }, 6000)
         }
     };
 
@@ -63,7 +70,7 @@ const main = async()=> {
             }
         }
 
-        if (!ignoreUsers.includes(user) && storage.enableTranslate) {
+        if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).cooldownTranslate) {
             // テキストのみを抽出
             let textsWithoutEmotes = "";
             msg.parseEmotes().forEach(obj => {
@@ -82,6 +89,7 @@ const main = async()=> {
                 console.error(error)
                 return null
             });
+            storage.addCooltimeTranslate(user);
         }
     });
 
