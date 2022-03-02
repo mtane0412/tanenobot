@@ -1,7 +1,7 @@
 "use strict";
 const ribenchi = require("./ribenchi");
 
-const command = (msg, message, storage) => {
+const command = async (msg, message, storage, apiClient) => {
   const result = message.split(' ');
   const cmd = result[0]; // ここに !cmd が入るよ
   const username = msg.userInfo.userName;
@@ -58,7 +58,10 @@ const command = (msg, message, storage) => {
     let soUser = result[1].toLowerCase().replace('@', '');
     // 第1引数を常にchannel nameと考えるよ！
     const channelName = storage.userInfo.get(soUser).username;
-    response = `https://www.twitch.tv/${channelName}`;
+    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUser).userId);
+    const gameName = await channelInfo.gameName;
+    const title = await channelInfo.title;
+    response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${channelName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
   }
 
   if(cmd === '!lobby') {

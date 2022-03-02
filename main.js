@@ -4,8 +4,10 @@ const command = require("./command");
 const doorbellPlay = require("./doorbellPlay");
 const {exclude, deepl} = require("./deepl");
 const fs = require('fs').promises;
+const { ApiClient } =  require('@twurple/api');
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
+const api = require('tmi.js/lib/api');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 
 const main = async()=> {
@@ -20,6 +22,7 @@ const main = async()=> {
         },
         tokenData
     );
+    const apiClient = new ApiClient({ authProvider });
     const chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
     await chatClient.connect();
 
@@ -27,15 +30,17 @@ const main = async()=> {
         enableTranslate: false,
         lobbyInfo: "",
         userInfo: new Map(),
-        addUserInfo(username, displayName) {
+        addUserInfo(userId, username, displayName) {
             this.userInfo.set(username,
                 {
+                    userId: userId,
                     username: username,
                     displayName: displayName
                 })
             if (username !== displayName) {
                 this.userInfo.set(displayName,
                     {
+                        userId: userId,
                         username: username,
                         displayName: displayName
                     })
@@ -43,11 +48,11 @@ const main = async()=> {
         }
     };
 
-    chatClient.onMessage((channel, user, message, msg) => {
+    chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
         if (!storage.userInfo.has(user)) {
-            storage.addUserInfo(user, msg.userInfo.displayName);
+            storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
             doorbellPlay(user);
         } 
 
@@ -58,7 +63,7 @@ const main = async()=> {
 
         // !command処理
         if(message.startsWith('!')) {
-            const response = command(msg, message, storage);
+            const response = await command(msg, message, storage, apiClient);
             if (response){
                 // お兄ちゃんに何か返すときだけ、返信しちゃお！
                 return chatClient.say(channel, response);
@@ -91,23 +96,23 @@ const main = async()=> {
     });
 
     chatClient.onSub((channel, user, subInfo, msg) => {
-        storage.addUserInfo(user, msg.userInfo.displayName);
+        storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel!`);
     });
     
     chatClient.onResub((channel, user, subInfo, msg) => {
-        storage.addUserInfo(user, msg.userInfo.displayName);
+        storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel for a total of ${subInfo.months} months!`);
     });
     
     chatClient.onSubGift((channel, user, subInfo, msg) => {
-        storage.addUserInfo(user, msg.userInfo.displayName);
+        storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
         chatClient.say(channel, `Thanks to ${subInfo.gifter} for gifting a subscription to ${user}!`);
     });
 
 
     chatClient.onRaid((channel, user, raidInfo, msg) => {
-        storage.addUserInfo(user, msg.userInfo.displayName);
+        storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
         const raider = raidInfo.displayName ? `${raidInfo.displayName}(${user})` : user;
         chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers`);
     });
