@@ -28,6 +28,7 @@ const main = async()=> {
     const storage = {
         enableTranslate: false,
         lobbyInfo: "",
+        streamInfo: new Map(),
         userInfo: new Map(),
         nameTable: new Map(),
         addUserInfo(userId, username, displayName) {
@@ -37,14 +38,15 @@ const main = async()=> {
                     userId: userId,
                     username: username,
                     displayName: displayName,
-                    cooldownTranslate: false
+                    translationCoolTime: 0
                 })
         },
-        addCooltimeTranslate(username) {
-            this.userInfo.get(username).cooldownTranslate = true;
+        addtranslationCoolTime(username) {
+            if (!this.streamInfo.get('translationCoolTime')) this.streamInfo.set('translationCoolTime', 6000);
+            this.userInfo.get(username).translationCoolTime = this.streamInfo.get('translationCoolTime');
             setTimeout(()=> {
-                this.userInfo.get(username).cooldownTranslate = false; 
-            }, 6000)
+                this.userInfo.get(username).translationCoolTime = 0; 
+            }, this.streamInfo.get('translationCoolTime'))
         }
     };
 
@@ -70,7 +72,7 @@ const main = async()=> {
             }
         }
 
-        if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).cooldownTranslate) {
+        if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
             // テキストのみを抽出
             let textsWithoutEmotes = "";
             msg.parseEmotes().forEach(obj => {
@@ -89,7 +91,7 @@ const main = async()=> {
                 console.error(error)
                 return null
             });
-            storage.addCooltimeTranslate(user);
+            storage.addtranslationCoolTime(user);
         }
     });
 

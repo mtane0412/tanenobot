@@ -20,9 +20,19 @@ const command = async (msg, message, storage, apiClient) => {
   }
 
 
-  if(cmd === '!translate') {
+  if(cmd === '!translation') {
     storage.enableTranslate = storage.enableTranslate ? false : true;
     response = storage.enableTranslate ? '翻訳はじめるじょ! Start to translate!' : '翻訳やめるじょ! Stop to translate!';
+  }
+
+  if(cmd === '!translationCoolTime') {
+    if (result.length === 1 || isNaN(result[1])) {
+      response = null
+    } else {
+      const cooltime = result[1];
+      storage.streamInfo.set('translationCoolTime', cooltime * 1000);
+      response = `/me 翻訳クールタイムを${cooltime}秒に設定したよ！`;
+    }
   }
 
   if(cmd === '!discord') {
