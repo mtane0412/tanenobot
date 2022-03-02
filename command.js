@@ -54,8 +54,9 @@ const command = (msg, message, storage) => {
   }
 
   if(cmd === '!so') {
+    // @マークがついていたら除外する
+    let soUser = result[1].toLowerCase().replace('@', '');
     // 第1引数を常にchannel nameと考えるよ！
-    const soUser = result[1].toLowerCase();
     const channelName = storage.userInfo.get(soUser).username;
     response = `https://www.twitch.tv/${channelName}`;
   }
