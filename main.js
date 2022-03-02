@@ -7,10 +7,8 @@ const fs = require('fs').promises;
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
-// WEBSTER_DICTIONARY_API_KEY
-// WEBSTER_THESAURUS_API_KEY
 
-async function main() {
+const main = async()=> {
     const clientId = process.env.CLIENT_ID;
     const clientSecret = process.env.CLIENT_SECRET;
     const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'UTF-8'));
@@ -33,9 +31,15 @@ async function main() {
             this.userInfo.set(username,
                 {
                     username: username,
-                    displayName: displayName,
-                    url: `https://www.twitch.tv/${username}`
+                    displayName: displayName
                 })
+            if (username !== displayName) {
+                this.userInfo.set(displayName,
+                    {
+                        username: username,
+                        displayName: displayName
+                    })
+            }
         }
     };
 
