@@ -7,11 +7,13 @@ const fs = require('fs').promises;
 const { ChatClient } =  require('@twurple/chat');
 const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
-
+// WEBSTER_DICTIONARY_API_KEY
+// WEBSTER_THESAURUS_API_KEY
 const isOnlySpace = (text) => {
     // 空白判定
     return !text.trim()
 };
+
 const isOnlyClap = (text) => {
     // 8888判定
     return !text.replace(/[\s8８]/g, '');
@@ -40,6 +42,7 @@ async function main() {
     await chatClient.connect();
 
     const storage = {
+        enableTranslate: false,
         lobbyInfo: "",
         userInfo: new Map(),
         addUserInfo(username, displayName) {
@@ -74,7 +77,7 @@ async function main() {
             }
         }
 
-        if (!ignoreUsers.includes(user)) {
+        if (!ignoreUsers.includes(user) && storage.enableTranslate) {
             // テキストのみを抽出
             let textsWithoutEmotes = "";
             msg.parseEmotes().forEach(obj => {
@@ -94,7 +97,7 @@ async function main() {
 
             // DeepL翻訳
             deepl(textsWithoutEmotes).then(result => {
-                chatClient.say(channel, `(${user}) ${result.data.translations[0].text}`);
+                chatClient.say(channel, `${result.data.translations[0].text} [by ${user}]`);
             }).catch(error => {
                 console.error(error)
                 return null

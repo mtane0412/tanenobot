@@ -19,6 +19,12 @@ const command = (msg, message, storage) => {
     }
   }
 
+
+  if(cmd === '!translate') {
+    storage.enableTranslate = storage.enableTranslate ? false : true;
+    response = storage.enableTranslate ? '翻訳はじめるじょ! Start to translate!' : '翻訳やめるじょ! Stop to translate!';
+  }
+
   if(cmd === '!discord') {
     response =  `Discordサーバーでぜひお話しましょう！ Why not join our discord server? Let's enjoy talking with us! https://discord.gg/F76ervs3sw`
   }
@@ -49,6 +55,7 @@ const command = (msg, message, storage) => {
 
   if(cmd === '!so') {
     // 第1引数を常にchannel nameと考えるよ！
+    // display nameでもshout outしたい
     const channelName = result[1].toLowerCase();
     response = `https://www.twitch.tv/${channelName}`;
   }
