@@ -4,6 +4,7 @@
     "@twurple/auth": "^5.0.18",
     "@twurple/chat": "^5.0.18",
     "@twurple/eventsub": "^5.0.18",
+    "axios": "^0.26.0",
     "deepl": "^1.0.13",
     "dotenv": "^16.0.0",
     "install": "^0.13.0",

@@ -75,6 +75,8 @@ const main = async()=> {
             if (response){
                 // お兄ちゃんに何か返すときだけ、返信しちゃお！
                 return chatClient.say(channel, response);
+            } else {
+                return
             }
         }
 

@@ -1,5 +1,6 @@
 "use strict";
 const ribenchi = require("./ribenchi");
+const dictionary = require("./dictionary");
 
 const command = async (msg, message, storage, apiClient) => {
   const result = message.split(' ');
@@ -19,6 +20,12 @@ const command = async (msg, message, storage, apiClient) => {
     }
   }
 
+  if(cmd === '!d' && result.length > 1) {
+    const query = result[1];
+    const dictResult = await dictionary(query);
+    // 500文字以上ならカットして返す
+    response = dictResult.length > 500 ? dictResult.substring(0, 498) + '……' : dictResult;
+  }
 
   if(cmd === '!translation') {
     storage.enableTranslate = storage.enableTranslate ? false : true;
