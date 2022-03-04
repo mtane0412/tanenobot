@@ -11,5 +11,14 @@ buffer.writeUInt8(00, 10);
 buffer.writeUInt32LE(messageBuffer.length, 11);
 messageBuffer.copy(buffer, 15, 0, messageBuffer.length);
 
-require('net').connect(options).end(buffer);
+require('net')
+    .connect(options)
+    .on('error', (err) => {
+        if (err.message.includes('ECONNREFUSED')) {
+            console.error("棒読みちゃんの接続に失敗しました。")
+        } else {
+            console.error(err);
+        }
+    })
+    .end(buffer);
 }
