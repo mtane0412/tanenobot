@@ -58,7 +58,6 @@ const main = async()=> {
     chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
-        
         if (!storage.userInfo.has(user)) {
             storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
             doorbellPlay(user);
@@ -123,10 +122,14 @@ const main = async()=> {
     });
 
 
-    chatClient.onRaid((channel, user, raidInfo, msg) => {
+    chatClient.onRaid(async (channel, user, raidInfo, msg) => {
         storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
         const raider = raidInfo.displayName ? `${raidInfo.displayName}(${user})` : user;
-        chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers`);
+        // 直前の配信情報取得
+        const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(user).userId);
+        const gameName = await channelInfo.gameName;
+        const title = await channelInfo.title;
+        chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers! Please check their stream https://www.twitch.tv/${user} 最後の配信は ${gameName} 「${title}」みたいですよ！`);
     });
 
     chatClient.onHosted((channel, byChannel, auto, viewers) => {
