@@ -1,5 +1,6 @@
 "use strict";
 require('dotenv').config();
+const bttv = require("./bttv");
 const command = require("./command");
 const doorbellPlay = require("./doorbellPlay");
 const {exclude, deepl} = require("./deepl");
@@ -55,6 +56,8 @@ const main = async()=> {
         }
     };
 
+    const bttvEmotes = await bttv(msg.userInfo.userId);
+
     chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
@@ -87,6 +90,10 @@ const main = async()=> {
             }
         });
 
+        bttvEmotes.forEach(emote=> {
+            textsWithoutEmotes = textsWithoutEmotes.replace(emote, "");
+        })
+
         bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
@@ -97,6 +104,7 @@ const main = async()=> {
 
             // DeepL翻訳
             deepl(textsWithoutEmotes).then(result => {
+                console.log(result);
                 chatClient.say(channel, `${result.data.translations[0].text} [by ${user}]`);
             }).catch(error => {
                 console.error(error)

@@ -1,27 +1,25 @@
 "use strict";
 const axios = require('axios');
 
+let emoteSet = new Set();
+
 const fetch = (url) => {
-    const emoteList = [];
     return axios.get(url)
         .then(res => {
-            if (url.includes('global')) {
+            if (url.includes('global') || url.includes("frankerfacez")) {
                 res.data.forEach(emote => {
-                    emoteList.push(emote.code);
+                    emoteSet.add(emote.code);
                 })
-            } else if (url.includes('frankerfacez')) {
-                emoteList.push(res.data.code);
             } else {
                 res.data.channelEmotes.forEach(emote => {
-                    emoteList.push(emote.code);
+                    emoteSet.add(emote.code);
                 })
                 res.data.sharedEmotes.forEach(emote => {
-                    emoteList.push(emote.code);
+                    emoteSet.add(emote.code);
                 })
             }
         })
-        .catch(error => console.log(error))
-        .then(() => { return emoteList })
+        .catch(error => console.log(error));
 }
 
 const getAllEmotes = (userId) => {
@@ -31,11 +29,10 @@ const getAllEmotes = (userId) => {
     return Promise.all([fetch(bttvGlobalEmotes), fetch(bttvChannelEmotes), fetch(ffzChannelEmotes)])
 }
 
-
 const bttv = async (userId) => {
-    const emoteLists = await getAllEmotes(userId);
-    const emoteList = emoteLists.flat();
-    return emoteList
+    await getAllEmotes(userId);
+    return emoteSet
 }
 
+//bttv(195327703);
 module.exports = bttv;
