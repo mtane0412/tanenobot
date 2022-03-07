@@ -56,7 +56,7 @@ const main = async()=> {
         }
     };
 
-    const bttvEmotes = await bttv(msg.userInfo.userId);
+    const bttvEmotes = await bttv(195327703);
 
     chatClient.onMessage(async (channel, user, message, msg) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
