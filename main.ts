@@ -1,17 +1,15 @@
-"use strict";
-
 import { AccessToken } from "@twurple/auth/lib";
 import { ChatSubGiftInfo } from "@twurple/chat/lib";
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
+import { ApiClient } from '@twurple/api';
+import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
+import { RefreshingAuthProvider } from '@twurple/auth';
 
 require('dotenv').config();
 const command = require("./command");
 const doorbellPlay = require("./doorbellPlay");
 const {exclude, deepl} = require("./deepl");
 const fs = require('fs').promises;
-const { ApiClient } =  require('@twurple/api');
-const { ChatClient } =  require('@twurple/chat');
-const { RefreshingAuthProvider } = require('@twurple/auth');
 const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 const bouyomiConnect = require('./bouyomi');
 const bouyomiServer = {
@@ -20,9 +18,12 @@ const bouyomiServer = {
 };
 
 const main = async()=> {
-    const clientId = process.env.CLIENT_ID;
-    const clientSecret = process.env.CLIENT_SECRET;
+    const clientId: string | undefined = process.env.CLIENT_ID;
+    const clientSecret: string | undefined = process.env.CLIENT_SECRET;
     const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'UTF-8'));
+    if (!clientId || !clientSecret) {
+        throw Error('client_id, client_secretが正しくないですよ！');
+    }
     const authProvider = new RefreshingAuthProvider(
         {
             clientId,
@@ -85,7 +86,7 @@ const main = async()=> {
         }
 
         // テキストのみを抽出
-        let textsWithoutEmotes = "";
+        let textsWithoutEmotes: string = '';
         msg.parseEmotes().forEach(obj => {
             if (obj.type === 'text') {
                 textsWithoutEmotes += obj.text;
@@ -133,12 +134,15 @@ const main = async()=> {
         const raider = raidInfo.displayName ? `${raidInfo.displayName}(${user})` : user;
         // 直前の配信情報取得
         const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(user).userId);
-        const gameName = await channelInfo.gameName;
-        const title = await channelInfo.title;
+        let lastStreamInfo: string;
+        if (channelInfo) {
+            lastStreamInfo = `${channelInfo.gameName} ${channelInfo.title}`
+        } else {
+        }
         chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers! Please check their stream https://www.twitch.tv/${user} 最後の配信は ${gameName} 「${title}」みたいですよ！`);
     });
 
-    chatClient.onHosted((channel:string, byChannel:string, auto:boolean, viewers:number) => {
+    chatClient.onHosted((channel: string, byChannel: string, auto: boolean, viewers: number) => {
         if (!auto){
             chatClient.say(channel, `we got hosted by ${byChannel} with ${viewers} viewers`);
         }

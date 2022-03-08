@@ -1,6 +1,11 @@
-require('dotenv').config();
-const translate = require("deepl");
-const AUTH_KEY = process.env.DEEPL_API_KEY;
+import * as dotenv from "dotenv";
+import translate, { DeeplLanguages } from "deepl";
+import { AxiosResponse } from "axios";
+
+dotenv.config;
+if (!process.env.DEEPL_API_KEY) throw Error('DeepL APIキーが正しくありません');
+const AUTH_KEY: string = process.env.DEEPL_API_KEY;
+
 
 const isOnlySpace = (text: string): boolean => {
     // 空白判定
@@ -30,14 +35,10 @@ const isJapanese = (text: string): boolean => {
 }
 
 
-type translation = {
-    Data: string[]
-}
 
-
-const deepl = (message: string): Promise<translation> => {
+const deepl = (message: string): Promise<AxiosResponse<Response>> => {
     // デフォルト翻訳先言語
-    let targetLang = 'JA';
+    let targetLang: DeeplLanguages = 'JA';
 
     // 日本語判定(中国語巻き込み)
     if(isJapanese(message)) {
@@ -49,7 +50,6 @@ const deepl = (message: string): Promise<translation> => {
         text: message,
         target_lang: targetLang,
         auth_key: AUTH_KEY,
-        // All optional parameters available in the official documentation can be defined here as well.
     })
 }
 
