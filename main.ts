@@ -1,3 +1,4 @@
+import * as dotenv from "dotenv";
 import { AccessToken } from "@twurple/auth/lib";
 import { ChatSubGiftInfo } from "@twurple/chat/lib";
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
@@ -9,7 +10,8 @@ import { bttv } from './bttv';
 import { doorbellPlay } from "./doorbellPlay";
 import { exclude, deepl } from "./deepl";
 
-require('dotenv').config();
+dotenv.config();
+
 const command = require("./command");
 
 
