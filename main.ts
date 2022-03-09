@@ -4,14 +4,17 @@ import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMe
 import { ApiClient } from '@twurple/api';
 import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
 import { RefreshingAuthProvider } from '@twurple/auth';
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from 'axios';
+import { bttv } from './bttv';
+import { doorbellPlay } from "./doorbellPlay";
+import { exclude, deepl } from "./deepl";
 
 require('dotenv').config();
 const command = require("./command");
-const doorbellPlay = require("./doorbellPlay");
-const {exclude, deepl} = require("./deepl");
+
+
 const fs = require('fs').promises;
-const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
+const ignoreUsers: string[] = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 const bouyomiConnect = require('./bouyomi');
 const bouyomiServer = {
     host: '127.0.0.1',
@@ -62,6 +65,8 @@ const main = async()=> {
         }
     };
 
+    const bttvEmotes: Set<string> = await bttv(195327703);
+
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
@@ -94,14 +99,19 @@ const main = async()=> {
             }
         });
 
+        // 絵文字除去
+        textsWithoutEmotes = textsWithoutEmotes.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+        
+        // BTTV/FFZのエモートを除去
+        bttvEmotes.forEach(emote=> {
+            textsWithoutEmotes = textsWithoutEmotes.replace(emote, '');
+        })
+
         bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
-
-
             // 除外判定に引っかかったら翻訳しない
             if (exclude(textsWithoutEmotes)) return
-
 
             // DeepL翻訳
             deepl(textsWithoutEmotes).then((result: AxiosResponse) => {
