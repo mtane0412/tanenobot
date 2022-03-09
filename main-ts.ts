@@ -97,18 +97,19 @@ const main = async()=> {
             }
         });
 
+        // 絵文字除去
+        textsWithoutEmotes = textsWithoutEmotes.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+        
+        // BTTV/FFZのエモートを除去
         bttvEmotes.forEach(emote=> {
-            textsWithoutEmotes = textsWithoutEmotes.replace(emote, "");
+            textsWithoutEmotes = textsWithoutEmotes.replace(emote, '');
         })
 
         bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
-
-
             // 除外判定に引っかかったら翻訳しない
             if (exclude(textsWithoutEmotes)) return
-
 
             // DeepL翻訳
             deepl(textsWithoutEmotes).then((result: AxiosResponse) => {
