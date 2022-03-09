@@ -36,7 +36,7 @@ const isJapanese = (text: string): boolean => {
 
 
 
-const deepl = (message: string): Promise<AxiosResponse<Response>> => {
+const deepl = async (message: string): Promise<AxiosResponse<Response>|any> => {
     // デフォルト翻訳先言語
     let targetLang: DeeplLanguages = 'JA';
 
@@ -44,6 +44,7 @@ const deepl = (message: string): Promise<AxiosResponse<Response>> => {
     if(isJapanese(message)) {
         targetLang = 'EN';    
     }
+
     // EN->JA or JA->EN
     return translate({
         free_api: true,
