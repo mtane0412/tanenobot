@@ -4,7 +4,8 @@ import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMe
 import { ApiClient } from '@twurple/api';
 import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
 import { RefreshingAuthProvider } from '@twurple/auth';
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from 'axios';
+import { bttv } from './bttv2';
 
 require('dotenv').config();
 const command = require("./command");
@@ -62,6 +63,8 @@ const main = async()=> {
         }
     };
 
+    const bttvEmotes: Set<string> = await bttv(195327703);
+
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
@@ -93,6 +96,10 @@ const main = async()=> {
                 textsWithoutEmotes += obj.text;
             }
         });
+
+        bttvEmotes.forEach(emote=> {
+            textsWithoutEmotes = textsWithoutEmotes.replace(emote, "");
+        })
 
         bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
 
