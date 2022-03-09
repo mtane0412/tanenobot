@@ -1,20 +1,26 @@
-"use strict";
-const axios = require('axios');
+import axios from 'axios';
 
-let emoteSet = new Set();
+let emoteSet= new Set<string>();
 
-const fetch = (url) => {
+type emoteCode = {
+    code: string
+}
+
+const fetch = (url:string) => {
     return axios.get(url)
-        .then(res => {
+        .then((res) => {
             if (url.includes('global') || url.includes("frankerfacez")) {
-                res.data.forEach(emote => {
+                // BTTV GlobalとFFZのエモートコードを追加
+                res.data.forEach((emote:any) => {
                     emoteSet.add(emote.code);
                 })
             } else {
-                res.data.channelEmotes.forEach(emote => {
+                // BTTV Channel Emotesを追加
+                res.data.channelEmotes.forEach((emote:any) => {
                     emoteSet.add(emote.code);
                 })
-                res.data.sharedEmotes.forEach(emote => {
+                // BTTV Shared Emotesを追加
+                res.data.sharedEmotes.forEach((emote:any) => {
                     emoteSet.add(emote.code);
                 })
             }
@@ -22,17 +28,14 @@ const fetch = (url) => {
         .catch(error => console.log(error));
 }
 
-const getAllEmotes = (userId) => {
+const getAllEmotes = (userId:number) => {
     const bttvGlobalEmotes = `https://api.betterttv.net/3/cached/emotes/global`;
     const bttvChannelEmotes = `https://api.betterttv.net/3/cached/users/twitch/${userId}`;
     const ffzChannelEmotes = `https://api.betterttv.net/3/cached/frankerfacez/users/twitch/${userId}`;
     return Promise.all([fetch(bttvGlobalEmotes), fetch(bttvChannelEmotes), fetch(ffzChannelEmotes)])
 }
 
-const bttv = async (userId) => {
+export const bttv = async (userId:number) => {
     await getAllEmotes(userId);
     return emoteSet
 }
-
-//bttv(195327703);
-module.exports = bttv;

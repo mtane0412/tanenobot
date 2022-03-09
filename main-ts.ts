@@ -5,14 +5,16 @@ import { ApiClient } from '@twurple/api';
 import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
 import { RefreshingAuthProvider } from '@twurple/auth';
 import { AxiosError, AxiosResponse } from 'axios';
-import { bttv } from './bttv2';
+import { bttv } from './bttv';
+import { doorbellPlay } from "./doorbellPlay";
+import { exclude, deepl } from "./deepl";
 
 require('dotenv').config();
 const command = require("./command");
-const doorbellPlay = require("./doorbellPlay");
-const {exclude, deepl} = require("./deepl");
+
+
 const fs = require('fs').promises;
-const ignoreUsers = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
+const ignoreUsers: string[] = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
 const bouyomiConnect = require('./bouyomi');
 const bouyomiServer = {
     host: '127.0.0.1',
