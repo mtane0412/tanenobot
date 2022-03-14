@@ -13,3 +13,12 @@ export const doorbellPlay = (user:string) => {
         console.error(error);
     });
 };
+
+export const rewardPlay = (rewardTitle:string) => {
+    // あとでかえる
+    const path = `./ribenchiTaneSaiteShine.wav`;
+    player.play({path: path})
+    .catch((error:unknown) => {
+        console.error(error);
+    })
+}

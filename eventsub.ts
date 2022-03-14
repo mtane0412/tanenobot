@@ -3,6 +3,7 @@ import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixEventSubSubscription, HelixPaginatedResultWithTotal } from '@twurple/api';
 import { EventSubListener } from '@twurple/eventsub';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
+import { rewardPlay } from './player';
 dotenv.config();
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.NGROK_SECRET) throw Error('何かが足りないです。');
@@ -20,7 +21,7 @@ const listener = new EventSubListener({
 
 const userId: string = '195327703';
 
-const getSubscriptions = ():Promise<HelixPaginatedResultWithTotal<HelixEventSubSubscription>> => {
+const getSubscriptions = async ():Promise<HelixPaginatedResultWithTotal<HelixEventSubSubscription>> => {
     return apiClient.eventSub.getSubscriptions();
 }
 
@@ -37,6 +38,7 @@ const subscribeToChannelCheerEvents = async ():Promise<void> => {
 const subscribeToChannelRedemptionAddEvents = async():Promise<void> => {
     listener.subscribeToChannelRedemptionAddEvents(userId, e => {
         console.log(`${e.redeemedAt}: ${e.userName} ${e.broadcasterName} ${e.rewardTitle}`);
+        if (e.rewardTitle === '最低') rewardPlay(e.rewardTitle);
     });
 }
 
