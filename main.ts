@@ -7,7 +7,7 @@ import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat
 import { RefreshingAuthProvider } from '@twurple/auth';
 import { AxiosError, AxiosResponse } from 'axios';
 import { bttv } from './bttv';
-import { doorbellPlay } from "./doorbellPlay";
+import { doorbellPlay } from "./player";
 import { exclude, deepl } from "./deepl";
 
 dotenv.config();
