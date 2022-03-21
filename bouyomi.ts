@@ -1,4 +1,3 @@
-'use strict';
 import * as net from 'net';
 
 export const bouyomiConnect = (message:string):void => {
