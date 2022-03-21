@@ -1,12 +1,10 @@
 import { ApiClient } from '@twurple/api';
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
-import { storage } from './storage'
-const ribenchi = require("./ribenchi");
-const dictionary = require("./dictionary");
+import { dictionary } from "./dictionary";
 
-const command = async (msg:TwitchPrivateMessage, message:string, storage:storage, apiClient:ApiClient) => {
-    const result = message.split(' ');
-    const cmd = result[0]; // ここに !cmd が入るよ
+export const command = async (msg:TwitchPrivateMessage, message:string, storage:any, apiClient:ApiClient) => {
+    const result: string[] = message.split(' ');
+    const cmd:string = result[0]; // ここに !cmd が入るよ
     const username = msg.userInfo.userName;
     const displayName = msg.userInfo.displayName;
     let response;
@@ -35,13 +33,13 @@ const command = async (msg:TwitchPrivateMessage, message:string, storage:storage
     }
 
     if(cmd === '!translationCoolTime') {
-    if (result.length === 1 || isNaN(result[1])) {
-        response = null
-    } else {
-        const cooltime = result[1];
-        storage.streamInfo.set('translationCoolTime', cooltime * 1000);
-        response = `/me 翻訳クールタイムを${cooltime}秒に設定したよ！`;
-    }
+        if (result.length === 1 || isNaN(Number(result[1]))) {
+            response = null
+        } else {
+            const cooltime = Number(result[1]);
+            storage.streamInfo.set('translationCoolTime', cooltime * 1000);
+            response = `/me 翻訳クールタイムを${cooltime}秒に設定したよ！`;
+        }
     }
 
     if(cmd === '!discord') {
@@ -64,10 +62,6 @@ const command = async (msg:TwitchPrivateMessage, message:string, storage:storage
     response = `このかわいいドラゴンの体を作ったのはイノラン博士です。あなたも人間をやめよう！ It was Dr. Inoran who created this cute little dragon body. You should stop being human too!  https://www.twitch.tv/doctor_inoran https://twitter.com/doctor_inoran`
     }
 
-    if(cmd === '!ribenchi') {
-    response = ribenchi;
-    }
-
     if (cmd === '!shuzo') {
     response = `諦めちゃダメだ！ https://www.shuzo.co.jp/message/`;
     }
@@ -78,14 +72,18 @@ const command = async (msg:TwitchPrivateMessage, message:string, storage:storage
 
     if(cmd === '!so') {
     // @マークがついていたら除外する
-    let soUser = result[1].replace('@', '');
+    let soUser:string = result[1].replace('@', '');
     // 表示名テーブルを参照して存在すればusernameに置き換える
-    const soUserName = storage.nameTable.get(soUser) ? storage.nameTable.get(soUser) : soUser.toLowerCase() ;
+    const soUserName:string = storage.nameTable.get(soUser) ? storage.nameTable.get(soUser)! : soUser.toLowerCase() ;
     // const channelName = storage.userInfo.get(soUsername).username;
-    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName).userId);
-    const gameName = await channelInfo.gameName;
-    const title = await channelInfo.title;
-    response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${soUserName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
+    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName)!.userId);
+    if (channelInfo) {
+        const gameName = channelInfo.gameName;
+        const title = channelInfo.title;
+        response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${soUserName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
+    } else {
+        return
+    }
     }
 
     if(cmd === '!lobby') {
@@ -111,5 +109,3 @@ const command = async (msg:TwitchPrivateMessage, message:string, storage:storage
     return 
     }
 }
-
-module.exports = command;

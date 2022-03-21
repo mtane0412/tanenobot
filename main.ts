@@ -1,47 +1,21 @@
 import * as dotenv from "dotenv";
-import { AccessToken } from "@twurple/auth/lib";
 import { ChatSubGiftInfo } from "@twurple/chat/lib";
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
-import { ApiClient } from '@twurple/api';
-import { ChatClient, ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
-import { RefreshingAuthProvider } from '@twurple/auth';
+import { ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
 import { AxiosError, AxiosResponse } from 'axios';
 import { bttv } from './bttv';
 import { doorbellPlay } from "./player";
 import { exclude, deepl } from "./deepl";
-
+import { getClient } from "./client";
+import { command } from "./command"
+import { bouyomiConnect } from "./bouyomi"
 dotenv.config();
 
-const command = require("./command");
-
-
-const fs = require('fs').promises;
 const ignoreUsers: string[] = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
-const bouyomiConnect = require('./bouyomi');
-const bouyomiServer = {
-    host: '127.0.0.1',
-    port: '50001'
-};
 
-const main = async()=> {
-    const clientId: string | undefined = process.env.CLIENT_ID;
-    const clientSecret: string | undefined = process.env.CLIENT_SECRET;
-    const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'UTF-8'));
-    if (!clientId || !clientSecret) {
-        throw Error('client_id, client_secretが正しくないですよ！');
-    }
-    const authProvider = new RefreshingAuthProvider(
-        {
-            clientId,
-            clientSecret,
-            onRefresh: async (newTokenData:AccessToken):Promise<AccessToken | null> => await fs.writeFile('./tokens.json', JSON.stringify(newTokenData, null, 4), 'UTF-8')
-        },
-        tokenData
-    );
-    const apiClient = new ApiClient({ authProvider });
-    const chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
+export const main = async()=> {
+    const { apiClient, chatClient } =  await getClient();
     await chatClient.connect();
-
     const storage = {
         enableTranslate: false,
         lobbyInfo: "",
@@ -109,7 +83,7 @@ const main = async()=> {
             textsWithoutEmotes = textsWithoutEmotes.replace(emote, '');
         })
 
-        bouyomiConnect.sendBouyomi(bouyomiServer, textsWithoutEmotes);
+        bouyomiConnect(textsWithoutEmotes);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
             // 除外判定に引っかかったら翻訳しない
