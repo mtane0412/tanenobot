@@ -10,9 +10,15 @@ import { getClient } from "./client";
 import { command } from "./command"
 import { bouyomiConnect } from "./bouyomi"
 import { sanitize } from "./sanitize"
+import * as toml from 'toml';
+import * as fs from 'fs';
+
+const sample = fs.readFileSync('./sample.toml', 'utf8');
+const data = toml.parse(sample);
+
 dotenv.config();
 
-const ignoreUsers: string[] = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
+const ignoreUsers: string[] = data.ignore_users;
 
 export const main = async()=> {
     const { apiClient, chatClient } =  await getClient();
@@ -50,7 +56,11 @@ export const main = async()=> {
         if (!storage.userInfo.has(user)) {
             storage.addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName);
             doorbellPlay(user);
-        } 
+        }
+
+        if(ignoreUsers.includes(user)) {
+            return
+        }
 
         // Cheer処理
         if(msg.isCheer) {
@@ -67,13 +77,15 @@ export const main = async()=> {
                 return
             }
         }
-
+        
+        
         const sanitizedMessage = sanitize(msg, bttvEmotes);
-
-        const name : string = msg.userInfo.displayName === 'ribenchi' ? msg.userInfo.displayName + '様' : msg.userInfo.displayName;
+        const name : string = msg.userInfo.displayName === 'Ribenchi' ? msg.userInfo.displayName + '様' : msg.userInfo.displayName;
         bouyomiConnect(name + ' ' + sanitizedMessage);
+    
 
-        if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
+
+        if (storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
             // 除外判定に引っかかったら翻訳しない
             if (exclude(sanitizedMessage)) return
 
