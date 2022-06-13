@@ -74,9 +74,10 @@ export const command = async (msg:TwitchPrivateMessage, message:string, storage:
     // @マークがついていたら除外する
     let soUser:string = result[1].replace('@', '');
     // 表示名テーブルを参照して存在すればusernameに置き換える
-    const soUserName:string = storage.nameTable.get(soUser) ? storage.nameTable.get(soUser)! : soUser.toLowerCase() ;
+    const soUserName:string = storage.nameTable.get(soUser)! || soUser.toLowerCase() ;
+    if (!storage.userInfo.get(soUserName)) return
     // const channelName = storage.userInfo.get(soUsername).username;
-    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName)!.userId);
+    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName).userId);
     if (channelInfo) {
         const gameName = channelInfo.gameName;
         const title = channelInfo.title;

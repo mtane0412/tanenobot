@@ -83,7 +83,7 @@ export const main = async()=> {
             textsWithoutEmotes = textsWithoutEmotes.replace(emote, '');
         })
 
-        bouyomiConnect(textsWithoutEmotes);
+        bouyomiConnect(msg.userInfo.displayName + ' ' +textsWithoutEmotes);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
             // 除外判定に引っかかったら翻訳しない
