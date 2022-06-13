@@ -10,6 +10,7 @@
     "deepl": "^1.0.13",
     "dotenv": "^16.0.0",
     "install": "^0.13.0",
+    "jest": "^28.1.1",
     "node-wav-player": "^0.2.0",
     "npm": "^8.5.2",
     "obs-websocket-js": "^4.0.3",

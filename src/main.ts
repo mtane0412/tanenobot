@@ -9,6 +9,7 @@ import { exclude, deepl } from "./deepl";
 import { getClient } from "./client";
 import { command } from "./command"
 import { bouyomiConnect } from "./bouyomi"
+import { sanitize } from "./sanitize"
 dotenv.config();
 
 const ignoreUsers: string[] = ['Nightbot', 'StreamElements', 'Streamlabs', 'tanenobot'];
@@ -67,30 +68,17 @@ export const main = async()=> {
             }
         }
 
-        // テキストのみを抽出
-        let textsWithoutEmotes: string = '';
-        msg.parseEmotes().forEach(obj => {
-            if (obj.type === 'text') {
-                textsWithoutEmotes += obj.text;
-            }
-        });
+        const sanitizedMessage = sanitize(msg, bttvEmotes);
 
-        // 絵文字除去
-        textsWithoutEmotes = textsWithoutEmotes.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
-        
-        // BTTV/FFZのエモートを除去
-        bttvEmotes.forEach(emote=> {
-            textsWithoutEmotes = textsWithoutEmotes.replace(emote, '');
-        })
-
-        bouyomiConnect(msg.userInfo.displayName + ' ' +textsWithoutEmotes);
+        const name : string = msg.userInfo.displayName === 'ribenchi' ? msg.userInfo.displayName + '様' : msg.userInfo.displayName;
+        bouyomiConnect(name + ' ' + sanitizedMessage);
 
         if (!ignoreUsers.includes(user) && storage.enableTranslate && !storage.userInfo.get(user).translationCoolTime) {
             // 除外判定に引っかかったら翻訳しない
-            if (exclude(textsWithoutEmotes)) return
+            if (exclude(sanitizedMessage)) return
 
             // DeepL翻訳
-            deepl(textsWithoutEmotes).then((result: AxiosResponse) => {
+            deepl(sanitizedMessage).then((result: AxiosResponse) => {
                 chatClient.say(channel, `${result.data.translations[0].text} [by ${user}]`);
             }).catch((error: AxiosError) => {
                 console.error(error)
