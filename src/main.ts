@@ -1,7 +1,6 @@
 import { ChatSubGiftInfo } from "@twurple/chat/lib";
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
 import { ChatSubInfo, UserNotice, ChatRaidInfo } from '@twurple/chat';
-import { AxiosError, AxiosResponse } from 'axios';
 import { bttv } from './bttv';
 import { doorbellPlay } from "./player";
 import { deepl } from "./deepl";
