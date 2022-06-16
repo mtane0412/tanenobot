@@ -1,8 +1,9 @@
 import { ApiClient } from '@twurple/api';
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
 import { dictionary } from "./dictionary";
+import { userInfo } from "./@types/index";
 
-export const command = async (msg:TwitchPrivateMessage, message:string, storage:any, apiClient:ApiClient) => {
+export const command = async (msg:TwitchPrivateMessage, message:string, userList:Array<userInfo>, apiClient:ApiClient) => {
     const result: string[] = message.split(' ');
     const cmd:string = result[0]; // ここに !cmd が入るよ
     const username = msg.userInfo.userName;
@@ -25,21 +26,6 @@ export const command = async (msg:TwitchPrivateMessage, message:string, storage:
     const dictResult = await dictionary(query);
     // 500文字以上ならカットして返す
     response = dictResult.length > 500 ? dictResult.substring(0, 498) + '……' : dictResult;
-    }
-
-    if(cmd === '!translation') {
-    storage.enableTranslate = storage.enableTranslate ? false : true;
-    response = storage.enableTranslate ? '翻訳はじめるじょ! Start to translate!' : '翻訳やめるじょ! Stop to translate!';
-    }
-
-    if(cmd === '!translationCoolTime') {
-        if (result.length === 1 || isNaN(Number(result[1]))) {
-            response = null
-        } else {
-            const cooltime = Number(result[1]);
-            storage.streamInfo.set('translationCoolTime', cooltime * 1000);
-            response = `/me 翻訳クールタイムを${cooltime}秒に設定したよ！`;
-        }
     }
 
     if(cmd === '!discord') {
@@ -72,33 +58,18 @@ export const command = async (msg:TwitchPrivateMessage, message:string, storage:
 
     if(cmd === '!so') {
     // @マークがついていたら除外する
-    let soUser:string = result[1].replace('@', '');
-    // 表示名テーブルを参照して存在すればusernameに置き換える
-    const soUserName:string = storage.nameTable.get(soUser)! || soUser.toLowerCase() ;
-    if (!storage.userInfo.get(soUserName)) return
-    // const channelName = storage.userInfo.get(soUsername).username;
-    const channelInfo = await apiClient.channels.getChannelInfo(storage.userInfo.get(soUserName).userId);
+    let soUser:string = result[1].replace('@', '').toLowerCase();
+    const user:userInfo|undefined = userList.find((user: userInfo)=>user.displayName.toLowerCase() === soUser || user.username.toLowerCase() === soUser);
+    // shoutoutのユーザーが存在しなければ終了
+    if (!user) return
+    const userId:string = user.userId;
+    const channelInfo = await apiClient.channels.getChannelInfoById(userId);
     if (channelInfo) {
         const gameName = channelInfo.gameName;
         const title = channelInfo.title;
-        response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${soUserName} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
+        response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${user.username} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
     } else {
         return
-    }
-    }
-
-    if(cmd === '!lobby') {
-    if(result.length === 1) {
-        // 引数なしの場合は storage.lobby の値を返す
-        response = storage.lobbyInfo;
-    } else if (result.length > 1 && username === 'tanenob' ) {
-        result.shift(); // 先頭の !command を削除
-        const text = result.join(' '); // 引数をすべて結合
-        storage.lobbyInfo = text;
-        response = `@${username} lobby情報を登録したよ！`;
-    } else {
-        // たねのぶ以外は登録できない
-        response = null;
     }
     }
 

@@ -2,7 +2,7 @@ import translate, { DeeplLanguages } from "deepl";
 import { AxiosResponse } from "axios";
 
 require('dotenv').config();
-if (!process.env.DEEPL_API_KEY) throw Error('DeepL APIキーが正しくありません');
+if (!process.env.DEEPL_API_KEY) throw Error('DeepL APIキーが設定されていません');
 const AUTH_KEY: string = process.env.DEEPL_API_KEY;
 
 
@@ -23,7 +23,7 @@ const isOnlyUrl = (text: string): boolean => {
     return regex.test(url)
 }
 
-export const exclude = (text: string): boolean => {
+const exclude = (text: string): boolean => {
     return isOnlySpace(text) || isOnlyClap(text) || isOnlyUrl(text)
 }
 
@@ -35,7 +35,10 @@ const isJapanese = (text: string): boolean => {
 
 
 
-export const deepl = async (message: string): Promise<AxiosResponse<Response>|any> => {
+export const deepl = async (message: string): Promise<string | undefined> => {
+    // 除外判定に引っかかった場合は翻訳しない
+    if(exclude(message)) return
+    
     // デフォルト翻訳先言語
     let targetLang: DeeplLanguages = 'JA';
 
@@ -45,10 +48,16 @@ export const deepl = async (message: string): Promise<AxiosResponse<Response>|an
     }
 
     // EN->JA or JA->EN
-    return translate({
+    const result = await translate({
         free_api: true,
         text: message,
         target_lang: targetLang,
         auth_key: AUTH_KEY,
-    })
+    });
+    
+    if (result.data.translations[0].text) {
+        return result.data.translations[0].text
+    } else {
+        return undefined
+    }
 }

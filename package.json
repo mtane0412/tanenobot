@@ -20,6 +20,6 @@
     "typescript": "^4.6.2"
   },
   "scripts": {
-    "start": "ts-node ./src/main.ts"
+    "start": "npx ts-node ./src/main.ts"
   }
 }

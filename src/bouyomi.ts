@@ -2,7 +2,6 @@ import * as net from 'net';
 
 export const bouyomiConnect = (message:string):void => {
     const client = new net.Socket();
-
     client.connect(50001, '127.0.0.1', () => {
         const iCommand = Buffer.alloc(2);
         iCommand.writeInt16LE(1, 0);  //コマンド（ 0:メッセージ読み上げ）
@@ -34,6 +33,10 @@ export const bouyomiConnect = (message:string):void => {
         client.write(iLength);
         client.write(bMessage);
         client.end();
+    });
+
+    client.on('error', function() {
+        //console.log("handled error");
     });
 
     /*
