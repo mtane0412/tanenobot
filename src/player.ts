@@ -1,11 +1,10 @@
 // inspired by Doorbellbot @L4yLa
 // https://github.com/L4yLa/TwitchBots
+import * as fs from 'fs';
 const player = require('node-wav-player');
 
-const users: string[] = ['kalon75', 'yoshiox11', 'ribenchi'];
-
 export const doorbellPlay = (user:string) => {
-    const path = users.includes(user) ? `./public/doorbell_${user}.wav` : './public/ribenchiHi.wav';
+    const path = fs.existsSync(`./public/doorbell/${user}.wav`) ? `./public/doorbell/${user}.wav` : './public/doorbell/default.wav';
     player.play({path: path})
     .then(() => {
         console.log(`${user}さんがいらっしゃいました！`);
@@ -13,12 +12,3 @@ export const doorbellPlay = (user:string) => {
         console.error(error);
     });
 };
-
-export const rewardPlay = (rewardTitle:string) => {
-    // あとでかえる
-    const path = `./public/ribenchiTaneSaiteShine.wav`;
-    player.play({path: path})
-    .catch((error:unknown) => {
-        console.error(error);
-    })
-}

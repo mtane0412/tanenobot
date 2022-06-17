@@ -14,7 +14,7 @@ import { userInfo } from "./@types/index";
 
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf8'));
 const ignoreUsers: string[] = config.ignore_users;
-const translation = config.translation;
+const translationEnabled = config.translation_enabled;
 
 const userList:Array<userInfo> = [];
 const addUserInfo = (userId: string, username: string, displayName: string, lastMessageDate: Date): void => {
@@ -38,7 +38,7 @@ export const main = async()=> {
     const streamStartDate = new Date();
     const { apiClient, chatClient } =  await getClient();
     await chatClient.connect();
-
+    console.log('tanenobot connected');
     const bttvEmotes: Set<string> = await bttv(195327703);
 
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
@@ -52,7 +52,6 @@ export const main = async()=> {
         }
 
         addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName, msg.date);
-        console.log(userList);
         if(ignoreUsers.includes(user)) {
             return
         }
@@ -78,7 +77,7 @@ export const main = async()=> {
         const name : string = msg.userInfo.displayName === 'Ribenchi' ? msg.userInfo.displayName + '様' : msg.userInfo.displayName;
         bouyomiConnect(name + ' ' + sanitizedMessage);
 
-        if (translation) {
+        if (translationEnabled) {
             // DeepL翻訳
             const result = await deepl(sanitizedMessage);
             if (result) chatClient.say(channel, `${result} [by ${user}]`);
