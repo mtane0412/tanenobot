@@ -1,7 +1,6 @@
 import translate, { DeeplLanguages } from "deepl";
-import { AxiosResponse } from "axios";
-
-require('dotenv').config();
+import * as dotenv from "dotenv";
+dotenv.config();
 if (!process.env.DEEPL_API_KEY) throw Error('DeepL APIキーが設定されていません');
 const AUTH_KEY: string = process.env.DEEPL_API_KEY;
 

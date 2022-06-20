@@ -11,6 +11,7 @@ import { sanitize } from "./sanitize"
 import * as toml from 'toml';
 import * as fs from 'fs';
 import { userInfo } from "./@types/index";
+import { subscribeEvents } from "./eventsub";
 
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf8'));
 const ignoreUsers: string[] = config.ignore_users;
@@ -38,9 +39,10 @@ export const main = async()=> {
     const streamStartDate = new Date();
     const { apiClient, chatClient } =  await getClient();
     await chatClient.connect();
+    await subscribeEvents();
     console.log('tanenobot connected');
     const bttvEmotes: Set<string> = await bttv(195327703);
-
+    
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
         console.log(`[${channel}] ${chatter}: ${message}`);
