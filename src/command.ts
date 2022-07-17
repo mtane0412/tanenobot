@@ -32,8 +32,8 @@ export const command = async (msg:TwitchPrivateMessage, message:string, userList
     response =  `Discordサーバーでぜひお話しましょう！ Why not join our discord server? Let's enjoy talking with us! https://discord.gg/F76ervs3sw`
     }
 
-    if(cmd === '!collab') {
-    response = `今日はSquishyWishyBooと日本語のお勉強をしています。毎日ゲームやArtや歌配信をしています。日本語もすごく上手なのでぜひチェックしてください！ https://www.twitch.tv/squishywishyboo`
+    if(cmd === '!lobby') {
+    response = `P6WJFN3r1N9e4a1r`
     }
 
     if(cmd === '!lurk') {

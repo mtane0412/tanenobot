@@ -41,6 +41,18 @@ export const main = async()=> {
     await chatClient.connect();
     await subscribeEvents();
     console.log('tanenobot connected');
+    chatClient.say('#tanenob', `tanenobot connected`);
+
+    // logファイル作成
+    const today = new Date();
+    const logFilePath = 'log/' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + '.txt';
+    if(!fs.existsSync(logFilePath)) {
+        fs.writeFile(logFilePath, '', (err) => {
+            if (err) { throw err; }
+            console.log('logを作成したよ！');
+        });
+    }
+
     const bttvEmotes: Set<string> = await bttv(195327703);
     
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
@@ -60,6 +72,10 @@ export const main = async()=> {
 
         // Cheer処理
         if(msg.isCheer) {
+            fs.appendFile(logFilePath, `Cheer: ${user}, ${msg.bits} bits, https://www.twitch.tv/${user} \n`, (err)=> {
+                if (err) { throw err; }
+                console.log('cheer情報を保存しました');
+            });
             return chatClient.say(channel, `Thanks for the ${msg.bits} bits!! ${chatter}`)
         }
 
@@ -77,7 +93,7 @@ export const main = async()=> {
         
         const sanitizedMessage = sanitize(msg, bttvEmotes);
         const name : string = msg.userInfo.displayName === 'Ribenchi' ? msg.userInfo.displayName + '様' : msg.userInfo.displayName;
-        bouyomiConnect(name + ' ' + sanitizedMessage);
+        bouyomiConnect(name + ' ' + message);
 
         if (translationEnabled) {
             // DeepL翻訳
@@ -89,16 +105,28 @@ export const main = async()=> {
     chatClient.onSub((channel:string, user:string, subInfo:ChatSubInfo, msg:UserNotice) => {
         addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName, msg.date);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel!`);
+        fs.appendFile(logFilePath, `SubScribe: ${user} \n`, (err)=> {
+            if (err) { throw err; }
+            console.log('Sub情報を保存しました');
+        });
     });
     
     chatClient.onResub((channel:string, user:string, subInfo:ChatSubInfo, msg:UserNotice) => {
         addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName, msg.date);
         chatClient.say(channel, `Thanks to @${user} for subscribing to the channel for a total of ${subInfo.months} months!`);
+        fs.appendFile(logFilePath, `ReSub: ${user} \n`, (err)=> {
+            if (err) { throw err; }
+            console.log('Resub情報を保存しました');
+        });
     });
     
     chatClient.onSubGift((channel:string, user:string, subInfo:ChatSubGiftInfo, msg:UserNotice) => {
         addUserInfo(msg.userInfo.userId, user, msg.userInfo.displayName, msg.date);
         chatClient.say(channel, `Thanks to ${subInfo.gifter} for gifting a subscription to ${user}!`);
+        fs.appendFile(logFilePath, `SubGift: ${subInfo.gifter} もらった人(${user}) \n`, (err)=> {
+            if (err) { throw err; }
+            console.log('SubGift情報を保存しました');
+        });
     });
 
 
@@ -114,6 +142,10 @@ export const main = async()=> {
             console.error('channelInfoがありません');
         }
         chatClient.say(channel, `we got raid by ${raider} with ${raidInfo.viewerCount} viewers! Please check their stream https://www.twitch.tv/${user} ${lastStreamInfo}`);
+        fs.appendFile(logFilePath, `Raid: ${user}, https://www.twitch.tv/${user} \n`, (err)=> {
+            if (err) { throw err; }
+            console.log('Raid情報を保存しました');
+        });
     });
 
     chatClient.onHosted((channel: string, byChannel: string, auto: boolean, viewers: number|undefined) => {

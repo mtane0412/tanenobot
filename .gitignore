@@ -1,5 +1,6 @@
-### twurple ###
+### user ###
 tokens.json
+log/
 
 # Created by https://www.toptal.com/developers/gitignore/api/windows,visualstudiocode,node,dotenv
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,visualstudiocode,node,dotenv
