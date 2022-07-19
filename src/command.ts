@@ -5,24 +5,14 @@ import { userInfo } from "./@types/index";
 
 export const command = async (msg:TwitchPrivateMessage, message:string, userList:Array<userInfo>, apiClient:ApiClient) => {
     const result: string[] = message.split(' ');
-    const cmd:string = result[0]; // ここに !cmd が入るよ
+    const cmd:string | undefined = result.shift(); // ここに !cmd が入るよ
     const username = msg.userInfo.userName;
     const displayName = msg.userInfo.displayName;
     let response;
+    const customCmd = new Map();
 
-    if (cmd === '!hello') {
-    if (result.length === 1) {
-        response = `hello ${username}`;
-    } else {
-        // テスト用
-        result.shift(); // 先頭の !command を削除
-        const text = result.join(' ');
-        response = `@${username} ${text}`;
-    }
-    }
-
-    if(cmd === '!d' && result.length > 1) {
-    const query = result[1];
+    if(cmd === '!d' && result.length > 0) {
+    const query = result.join(' ');
     const dictResult = await dictionary(query);
     // 500文字以上ならカットして返す
     response = dictResult.length > 500 ? dictResult.substring(0, 498) + '……' : dictResult;
@@ -33,7 +23,7 @@ export const command = async (msg:TwitchPrivateMessage, message:string, userList
     }
 
     if(cmd === '!lobby') {
-    response = `P6WJFN3r1N9e4a1r`
+    response = `NGHG9HNTANQ9fFHK`
     }
 
     if(cmd === '!lurk') {
@@ -58,7 +48,7 @@ export const command = async (msg:TwitchPrivateMessage, message:string, userList
 
     if(cmd === '!so') {
     // @マークがついていたら除外する
-    let soUser:string = result[1].replace('@', '').toLowerCase();
+    let soUser:string = result[0].replace('@', '').toLowerCase();
     const user:userInfo|undefined = userList.find((user: userInfo)=>user.displayName.toLowerCase() === soUser || user.username.toLowerCase() === soUser);
     // shoutoutのユーザーが存在しなければ終了
     if (!user) return
@@ -67,7 +57,7 @@ export const command = async (msg:TwitchPrivateMessage, message:string, userList
     if (channelInfo) {
         const gameName = channelInfo.gameName;
         const title = channelInfo.title;
-        response = await `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${user.username} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
+        response = `この素晴らしい配信者をチェックしてください！ https://www.twitch.tv/${user.username} 最後の配信は ${gameName} 「${title}」みたいですよ！`;
     } else {
         return
     }
