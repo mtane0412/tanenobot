@@ -97,8 +97,12 @@ export const main = async()=> {
 
         if (translationEnabled) {
             // DeepL翻訳
-            const result = await deepl(sanitizedMessage);
-            if (result) chatClient.say(channel, `${result} [by ${user}]`);
+            try {
+                const result = await deepl(sanitizedMessage);
+                if (result) chatClient.say(channel, `${result} [by ${user}]`);
+            } catch (error) {
+                console.error(error);
+            }
         }
     });
 

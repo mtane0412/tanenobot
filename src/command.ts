@@ -10,7 +10,6 @@ export const command = async (msg:TwitchPrivateMessage, message:string, userList
     const username = msg.userInfo.userName;
     const displayName = msg.userInfo.displayName;
     let response:string = '';
-    
 
     if (customCmd.has(cmd)) {
         response = customCmd.get(cmd);

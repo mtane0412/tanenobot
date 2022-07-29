@@ -6,6 +6,14 @@ import { NgrokAdapter } from '@twurple/eventsub-ngrok';
 
 dotenv.config();
 
+let ecstasyGauge: number = 0;
+const ecstacyTimer = setInterval(()=> {
+    if(ecstasyGauge >= 10) {
+        ecstasyGauge -= 10;
+    }
+    console.log({ecstasyGauge});
+}, 20000)
+
 export const subscribeEvents = async() => {
     if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.NGROK_SECRET) throw Error('何かが足りないです。');
 
@@ -56,6 +64,14 @@ export const subscribeEvents = async() => {
     const subscribeToChannelRedemptionAddEvents = async():Promise<void> => {
         listener.subscribeToChannelRedemptionAddEvents(userId, e => {
             console.log(`${e.redeemedAt}: ${e.userName} ${e.broadcasterName} ${e.rewardTitle}`);
+            if(e.rewardTitle.match('kimoi')) {
+                ecstasyGauge += 10;
+                if (ecstasyGauge === 100) {
+                    console.log('ecstasy event');
+                    ecstasyGauge = 0;
+                }
+                console.log({ecstasyGauge});
+            }
         });
     }
     
