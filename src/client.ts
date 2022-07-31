@@ -25,5 +25,6 @@ export const getClient = async() => {
     );
     const apiClient = new ApiClient({ authProvider });
     const chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
+    await chatClient.connect();
     return { apiClient, chatClient }
 }

@@ -38,7 +38,6 @@ const addUserInfo = (userId: string, username: string, displayName: string, last
 export const main = async()=> {
     const streamStartDate = new Date();
     const { apiClient, chatClient } =  await getClient();
-    await chatClient.connect();
     await subscribeEvents();
     console.log('tanenobot connected');
     chatClient.say('#tanenob', `tanenobot connected`);

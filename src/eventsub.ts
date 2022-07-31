@@ -3,18 +3,17 @@ import { ClientCredentialsAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixEventSubSubscription, HelixPaginatedResultWithTotal } from '@twurple/api';
 import { EventSubListener } from '@twurple/eventsub';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
+import { getClient } from "./client";
 
 dotenv.config();
 
-let ecstasyGauge: number = 0;
-const ecstacyTimer = setInterval(()=> {
-    if(ecstasyGauge >= 10) {
-        ecstasyGauge -= 10;
-    }
-    console.log({ecstasyGauge});
-}, 20000)
-
 export const subscribeEvents = async() => {
+    let ecstasyGauge: number = 0;
+    const ecstacyTimer = setInterval(()=> {
+        if(ecstasyGauge >= 10) {
+            ecstasyGauge -= 10;
+        }
+    }, 20000)
     if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.NGROK_SECRET) throw Error('何かが足りないです。');
 
     const clientId: string = process.env.CLIENT_ID;
@@ -28,7 +27,7 @@ export const subscribeEvents = async() => {
         secret: process.env.NGROK_SECRET,
         strictHostCheck: true
     });
-    
+    const { chatClient } =  await getClient();
     const userId: string = '195327703';
     
     const getSubscriptions = async ():Promise<HelixPaginatedResultWithTotal<HelixEventSubSubscription>> => {
@@ -66,11 +65,20 @@ export const subscribeEvents = async() => {
             console.log(`${e.redeemedAt}: ${e.userName} ${e.broadcasterName} ${e.rewardTitle}`);
             if(e.rewardTitle.match('kimoi')) {
                 ecstasyGauge += 10;
+                chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
                 if (ecstasyGauge === 100) {
                     console.log('ecstasy event');
                     ecstasyGauge = 0;
                 }
-                console.log({ecstasyGauge});
+            }
+
+            if(e.rewardTitle.match('leaf gacha')) {
+                const baldnessProbability = Math.floor(Math.random() * 100);
+                if (baldnessProbability < 30) {
+                    chatClient.say('#tanenob', `ハゲになります`);
+                } else {
+                    chatClient.say('#tanenob', `葉っぱをかぶります`);
+                }
             }
         });
     }
