@@ -8,12 +8,6 @@ import { getClient } from "./client";
 dotenv.config();
 
 export const subscribeEvents = async() => {
-    let ecstasyGauge: number = 0;
-    const ecstacyTimer = setInterval(()=> {
-        if(ecstasyGauge >= 10) {
-            ecstasyGauge -= 10;
-        }
-    }, 20000)
     if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.NGROK_SECRET) throw Error('何かが足りないです。');
 
     const clientId: string = process.env.CLIENT_ID;
@@ -60,12 +54,21 @@ export const subscribeEvents = async() => {
         })
     }
 
+    let ecstasyGauge: number = 0;
+    let ecstacyTimer:NodeJS.Timer;
     const subscribeToChannelRedemptionAddEvents = async():Promise<void> => {
         listener.subscribeToChannelRedemptionAddEvents(userId, e => {
             console.log(`${e.redeemedAt}: ${e.userName} ${e.broadcasterName} ${e.rewardTitle}`);
             if(e.rewardTitle.match('kimoi')) {
+                clearInterval(ecstacyTimer);
                 ecstasyGauge += 10;
                 chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
+                ecstacyTimer = setInterval(()=> {
+                    if(ecstasyGauge >= 10) {
+                        ecstasyGauge -= 10;
+                        chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
+                    }
+                }, 20000)
                 if (ecstasyGauge === 100) {
                     console.log('ecstasy event');
                     ecstasyGauge = 0;
