@@ -8,7 +8,17 @@ import { promises as fs } from "fs";
 
 dotenv.config();
 
+let apiClient:ApiClient|undefined;
+let chatClient:ChatClient|undefined;
+
 export const getClient = async() => {
+    if (typeof apiClient !== 'undefined' && typeof chatClient !== 'undefined') {
+        // すでにインスタンスがある場合はそれを返す
+        return {apiClient, chatClient}
+    }
+
+    // インスタンスを作成
+
     const clientId: string | undefined = process.env.CLIENT_ID;
     const clientSecret: string | undefined = process.env.CLIENT_SECRET;
     const tokenData = JSON.parse(await fs.readFile('./tokens.json', 'utf8'));
@@ -23,8 +33,8 @@ export const getClient = async() => {
         },
         tokenData
     );
-    const apiClient = new ApiClient({ authProvider });
-    const chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
+    apiClient = new ApiClient({ authProvider });
+    chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
     await chatClient.connect();
     return { apiClient, chatClient }
 }

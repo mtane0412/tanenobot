@@ -2,9 +2,13 @@ import { ApiClient } from '@twurple/api';
 import { TwitchPrivateMessage } from "@twurple/chat/lib/commands/TwitchPrivateMessage";
 import { dictionary } from "./dictionary";
 import { userInfo } from "./@types/index";
+import { getClient } from "./client";
+
 const customCmd = new Map();
 
+
 export const command = async (msg:TwitchPrivateMessage, message:string, userList:Array<userInfo>, apiClient:ApiClient) => {
+    const { chatClient } =  await getClient();
     const result: string[] = message.split(' ');
     const cmd:string | undefined = result.shift(); // ここに !cmd が入るよ
     const username = msg.userInfo.userName;

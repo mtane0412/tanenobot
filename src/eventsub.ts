@@ -5,6 +5,10 @@ import { EventSubListener } from '@twurple/eventsub';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
 import { getClient } from "./client";
 import * as robot from "robotjs";
+import * as https from "https";
+import jsdom from "jsdom";
+const { JSDOM } = jsdom;
+import { bouyomiConnect } from "./bouyomi"
 
 dotenv.config();
 
@@ -74,6 +78,22 @@ export const subscribeEvents = async() => {
                     console.log('ecstasy event');
                     ecstasyGauge = 0;
                 }
+            }
+
+            if(e.rewardTitle.match('トークのお題！')) {
+                const url = 'https://talkgacha.com/';
+                https.get(url, res => {
+                    let html = '';
+                    res.on('data', line => html += line);
+                    res.on('end', async () => {
+                        const dom = new JSDOM(html);
+                        const theme:string|undefined = dom.window.document.querySelector('.talk-theme-text')?.textContent?.replace(/\s/g, '');
+                        if (typeof theme !== 'undefined') {
+                            chatClient.say('#tanenob', '【お題】'+ theme + '(提供: トークテーマガチャ https://talkgacha.com/)');
+                            bouyomiConnect(theme);
+                        }
+                    });
+        });
             }
 
             if(e.rewardTitle.match('leaf gacha')) {
