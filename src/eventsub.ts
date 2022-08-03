@@ -4,6 +4,7 @@ import { ApiClient, HelixEventSubSubscription, HelixPaginatedResultWithTotal } f
 import { EventSubListener } from '@twurple/eventsub';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
 import { getClient } from "./client";
+import * as robot from "robotjs";
 
 dotenv.config();
 
@@ -79,8 +80,14 @@ export const subscribeEvents = async() => {
                 const baldnessProbability = Math.floor(Math.random() * 100);
                 if (baldnessProbability < 30) {
                     chatClient.say('#tanenob', `ハゲになります`);
+                    robot.keyTap("f6", "shift");
+                    setTimeout(()=>{
+                        robot.keyTap("f1", "shift");
+                        chatClient.say('#tanenob', "たねのぶは恥ずかしがって葉っぱをかぶりました。");
+                    }, 600000)
                 } else {
                     chatClient.say('#tanenob', `葉っぱをかぶります`);
+                    robot.keyTap("f1", "shift");
                 }
             }
         });
