@@ -9,6 +9,8 @@ import * as https from "https";
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 import { bouyomiConnect } from "./bouyomi"
+import { play } from "./player";
+import { setTimeout as sleep} from "timers/promises";
 
 dotenv.config();
 
@@ -89,6 +91,8 @@ export const subscribeEvents = async() => {
                         const dom = new JSDOM(html);
                         const theme:string|undefined = dom.window.document.querySelector('.talk-theme-text')?.textContent?.replace(/\s/g, '');
                         if (typeof theme !== 'undefined') {
+                            play('./public/sound/quiz.wav');
+                            await sleep(2000);
                             chatClient.say('#tanenob', '【お題】'+ theme + '(提供: トークテーマガチャ https://talkgacha.com/)');
                             bouyomiConnect(theme);
                         }
