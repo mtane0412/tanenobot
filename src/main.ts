@@ -38,7 +38,8 @@ const addUserInfo = (userId: string, username: string, displayName: string, last
 export const main = async()=> {
     const streamStartDate = new Date();
     const { apiClient, chatClient } =  await getClient();
-    await subscribeEvents();
+    subscribeEvents(); // eventをsubscribeする
+    setInterval(subscribeEvents, 6840000); // 約2時間周期でngrokインスタンスを立て直す
     console.log('tanenobot connected');
     chatClient.say('#tanenob', `tanenobot connected`);
 

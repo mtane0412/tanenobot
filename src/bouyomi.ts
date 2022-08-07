@@ -20,7 +20,7 @@ export const bouyomiConnect = (message:string):void => {
         client.write(iVolume);
 
         const iVoice = Buffer.alloc(2);
-        iVoice.writeInt16LE(1, 0);    //声質   （ 1:女性)
+        iVoice.writeInt16LE(0, 0);    //声質   （ 1:女性)
         client.write(iVoice);
 
         const bCode = Buffer.alloc(1);
