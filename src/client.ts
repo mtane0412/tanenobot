@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 import { ApiClient } from '@twurple/api';
 import { AccessToken } from "@twurple/auth/lib";
 import { ChatClient } from '@twurple/chat';
-import { RefreshingAuthProvider } from '@twurple/auth';
+import { RefreshingAuthProvider, ClientCredentialsAuthProvider } from '@twurple/auth';
 import { promises as fs } from "fs";
 
 
@@ -10,11 +10,12 @@ dotenv.config();
 
 let apiClient:ApiClient|undefined;
 let chatClient:ChatClient|undefined;
+let apiClientForEventsub:ApiClient|undefined;
 
 export const getClient = async() => {
-    if (typeof apiClient !== 'undefined' && typeof chatClient !== 'undefined') {
+    if (typeof apiClient !== 'undefined' && typeof chatClient !== 'undefined' && typeof apiClientForEventsub !== 'undefined') {
         // すでにインスタンスがある場合はそれを返す
-        return {apiClient, chatClient}
+        return {apiClient, apiClientForEventsub, chatClient}
     }
 
     // インスタンスを作成
@@ -25,7 +26,7 @@ export const getClient = async() => {
     if (!clientId || !clientSecret) {
         throw Error('client_id, client_secretが正しくないですよ！');
     }
-    const authProvider = new RefreshingAuthProvider(
+    const authProvider:RefreshingAuthProvider = new RefreshingAuthProvider(
         {
             clientId,
             clientSecret,
@@ -33,8 +34,13 @@ export const getClient = async() => {
         },
         tokenData
     );
+    
     apiClient = new ApiClient({ authProvider });
     chatClient = new ChatClient({ authProvider, channels: ['tanenob'] });
+
+    const authProviderForEventsub:ClientCredentialsAuthProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+    apiClientForEventsub = new ApiClient({ authProvider: authProviderForEventsub });
+    
     await chatClient.connect();
-    return { apiClient, chatClient }
+    return { apiClient, apiClientForEventsub, chatClient }
 }

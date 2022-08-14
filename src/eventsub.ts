@@ -1,6 +1,5 @@
 import * as dotenv from "dotenv";
-import { ClientCredentialsAuthProvider } from '@twurple/auth';
-import { ApiClient, HelixEventSubSubscription, HelixPaginatedResultWithTotal } from '@twurple/api';
+import { HelixEventSubSubscription, HelixPaginatedResultWithTotal } from '@twurple/api';
 import { EventSubListener } from '@twurple/eventsub';
 import { NgrokAdapter } from '@twurple/eventsub-ngrok';
 import { getClient } from "./client";
@@ -13,30 +12,35 @@ import { play } from "./player";
 import { setTimeout as sleep} from "timers/promises";
 
 dotenv.config();
-
-export const subscribeEvents = async() => {
-    if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.NGROK_SECRET) throw Error('何かが足りないです。');
-
-    const clientId: string = process.env.CLIENT_ID;
-    const clientSecret: string = process.env.CLIENT_SECRET;
-    const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
-    const apiClient = new ApiClient({ authProvider });
-
-    const listener = new EventSubListener({
-        apiClient,
-        adapter: new NgrokAdapter(),
-        secret: process.env.NGROK_SECRET,
+let ngrokAdapter:NgrokAdapter;
+export const subscribeEvents = async():Promise<EventSubListener> => {
+    if (!process.env.NGROK_SECRET) throw Error('ngrokのsecretがありません');
+    if (typeof ngrokAdapter !== 'undefined') {
+        console.log('kill ngrok...')
+        console.log(await ngrokAdapter.getHostName());
+        //ngrok.disconnect(await ngrokAdapter.getHostName());
+        //await ngrok.connect();
+    }
+    const secret:string = (performance.now().toString(36)+Math.random().toString(36)).replace(/\./g,"");
+    console.log({secret});
+    const { apiClientForEventsub, chatClient } =  await getClient();
+    ngrokAdapter = new NgrokAdapter();
+    console.log(await ngrokAdapter.getHostName());
+    const listener:EventSubListener = new EventSubListener({
+        apiClient: apiClientForEventsub,
+        adapter: ngrokAdapter,
+        secret: secret,
         strictHostCheck: true
     });
-    const { chatClient } =  await getClient();
+    
     const userId: string = '195327703';
     
     const getSubscriptions = async ():Promise<HelixPaginatedResultWithTotal<HelixEventSubSubscription>> => {
-        return apiClient.eventSub.getSubscriptions();
+        return apiClientForEventsub.eventSub.getSubscriptions();
     }
     
     const deleteAllSubscriptions = async ():Promise<void> => {
-        apiClient.eventSub.deleteAllSubscriptions();
+        apiClientForEventsub.eventSub.deleteAllSubscriptions();
         console.log('deleted all subscriptions.')
     }
     
@@ -104,14 +108,14 @@ export const subscribeEvents = async() => {
                 const baldnessProbability = Math.floor(Math.random() * 100);
                 if (baldnessProbability < 30) {
                     chatClient.say('#tanenob', `ハゲになります`);
-                    robot.keyTap("f6", "shift");
+                    robot.keyTap("f6", ["control", "shift"]);
                     setTimeout(()=>{
-                        robot.keyTap("f1", "shift");
+                        robot.keyTap("f1", ["control", "shift"]);
                         chatClient.say('#tanenob', "たねのぶは恥ずかしがって葉っぱをかぶりました。");
                     }, 600000)
                 } else {
                     chatClient.say('#tanenob', `葉っぱをかぶります`);
-                    robot.keyTap("f1", "shift");
+                    robot.keyTap("f1", ["control", "shift"]);
                 }
             }
         });
@@ -129,7 +133,8 @@ export const subscribeEvents = async() => {
     await subscribeToChannelRedemptionAddEvents();
     await subscribeToChannelFollowEvents();
     const subscriptions = await getSubscriptions();
-    console.log(subscriptions);
-    listener.listen();
+    console.log(subscriptions.total + 'subscriptions');
+    await listener.listen();
     console.log('listening...');
+    return listener
 }

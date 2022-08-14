@@ -12,6 +12,7 @@ import * as toml from 'toml';
 import * as fs from 'fs';
 import { userInfo } from "./@types/index";
 import { subscribeEvents } from "./eventsub";
+import { connectOBS, tanenobFyre, disconnectOBS } from "./obs-websocket"
 
 const config = toml.parse(fs.readFileSync('./config.toml', 'utf8'));
 const ignoreUsers: string[] = config.ignore_users;
@@ -39,7 +40,7 @@ export const main = async()=> {
     const streamStartDate = new Date();
     const { apiClient, chatClient } =  await getClient();
     subscribeEvents(); // eventをsubscribeする
-    setInterval(subscribeEvents, 6840000); // 約2時間周期でngrokインスタンスを立て直す
+    //setInterval(subscribeEvents, 6000); // 約2時間周期 6840000でngrokインスタンスを立て直す
     console.log('tanenobot connected');
     chatClient.say('#tanenob', `tanenobot connected`);
 
@@ -54,6 +55,9 @@ export const main = async()=> {
     }
 
     const bttvEmotes: Set<string> = await bttv(195327703);
+
+    // OBS Websocket 接続
+    connectOBS();
     
     chatClient.onMessage(async (channel: string, user: string, message: string, msg: TwitchPrivateMessage) => {
         const chatter = msg.userInfo.displayName === user ? user : `${msg.userInfo.displayName}(${user})`;
