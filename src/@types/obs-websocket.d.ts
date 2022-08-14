@@ -1,4 +1,4 @@
-type SceneItem = {
+export type SceneItem = {
     inputKind: string|null,no
     isGroup: boolean|null,
     sceneItemBlendMode: string,
@@ -28,4 +28,11 @@ type SceneItem = {
     },
     sourceName: string,
     sourceType: string
+}
+
+export type Triggers = Map<string,Trigger>;
+export type Trigger = {
+    sceneName: string;
+    sourceName: string;
+    duration: number|null;
 }

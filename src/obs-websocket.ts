@@ -1,13 +1,8 @@
 import OBSWebSocket, {OBSEventTypes, OBSRequestTypes, OBSResponseTypes} from 'obs-websocket-js';
 import * as dotenv from "dotenv";
 import { setTimeout as sleep} from "timers/promises";
+import { SceneItem, Trigger } from './@types/obs-websocket';
 dotenv.config();
-
-type SceneItem = {
-    sourceName: string;
-    sceneItemId: number;
-    sceneItemEnabled: boolean
-}
 
 const obs:OBSWebSocket = new OBSWebSocket();
 
@@ -27,23 +22,29 @@ const disconnectOBS = async () => {
 }
 
 
-const tanenobFyre = async (sceneName:string, sourceName:string, duration:number) => {
+const tanenobFyre = async (trigger:Trigger) => {
+    const { sceneName, sourceName, duration } = trigger;
     const sceneItemList:OBSResponseTypes['GetSceneItemList'] = await obs.call('GetSceneItemList', {sceneName});
     const sceneItem = sceneItemList.sceneItems.find(item=>item.sourceName === sourceName) as SceneItem;
     const sceneItemId:number|undefined = sceneItem?.sceneItemId;
     if(sceneItemId) {
         await obs.call('SetSceneItemEnabled', {sceneName, sceneItemId, sceneItemEnabled: true});
-        await sleep(duration)
+        if (duration) {
+            await sleep(duration);
+            await obs.call('SetSceneItemEnabled', {sceneName, sceneItemId, sceneItemEnabled: false});
+        }
+    }
+}
+
+const setSceneDisabled = async (trigger:Trigger) => {
+    const { sceneName, sourceName } = trigger;
+    const sceneItemList:OBSResponseTypes['GetSceneItemList'] = await obs.call('GetSceneItemList', {sceneName});
+    const sceneItem = sceneItemList.sceneItems.find(item=>item.sourceName === sourceName) as SceneItem;
+    const sceneItemId:number|undefined = sceneItem?.sceneItemId;
+    if(sceneItemId) {
         await obs.call('SetSceneItemEnabled', {sceneName, sceneItemId, sceneItemEnabled: false});
     }
 }
 
-const main = async () => {
-    await connectOBS();
-    await tanenobFyre('TriggerFyre', 'SuperIdol', 16000)
-    await disconnectOBS();
-}
 
-main();
-
-export {connectOBS, tanenobFyre, disconnectOBS}
+export {connectOBS, disconnectOBS, tanenobFyre, setSceneDisabled}

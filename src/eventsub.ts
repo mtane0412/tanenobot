@@ -10,6 +10,8 @@ const { JSDOM } = jsdom;
 import { bouyomiConnect } from "./bouyomi"
 import { play } from "./player";
 import { setTimeout as sleep} from "timers/promises";
+import { setSceneDisabled, tanenobFyre } from "./obs-websocket";
+import { Trigger, Triggers } from "./@types/obs-websocket";
 
 dotenv.config();
 let ngrokAdapter:NgrokAdapter;
@@ -22,7 +24,6 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
         //await ngrok.connect();
     }
     const secret:string = (performance.now().toString(36)+Math.random().toString(36)).replace(/\./g,"");
-    console.log({secret});
     const { apiClientForEventsub, chatClient } =  await getClient();
     ngrokAdapter = new NgrokAdapter();
     console.log(await ngrokAdapter.getHostName());
@@ -34,7 +35,43 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
     });
     
     const userId: string = '195327703';
+    const triggers:Triggers = new Map();
+    triggers.set("SuperHydrate", {
+        sceneName: "TanenobFyre",
+        sourceName: "SuperHydrate",
+        duration: 16000
+    });
+
+    triggers.set("JUST DO IT", {
+        sceneName: "TanenobFyre",
+        sourceName: "JUST DO IT",
+        duration: 8000
+    });
     
+    triggers.set("Sprinkle Salt", {
+        sceneName: "共通コンポ 後",
+        sourceName: "SaltBae",
+        duration: 3000
+    });
+
+    triggers.set("HEAD PAT", {
+        sceneName: "共通コンポ アバター",
+        sourceName: "共通コンポ headpat",
+        duration: 9000
+    });
+
+    triggers.set("フォローチャンス！", {
+        sceneName: "共通コンポ 前",
+        sourceName: "snippet-followChance",
+        duration: 5000
+    });
+
+    const ecstasyTrigger:Trigger = {
+        sceneName: "TanenobFyre",
+        sourceName: "never gonna give you up",
+        duration: null
+    }
+
     const getSubscriptions = async ():Promise<HelixPaginatedResultWithTotal<HelixEventSubSubscription>> => {
         return apiClientForEventsub.eventSub.getSubscriptions();
     }
@@ -67,23 +104,39 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
 
     let ecstasyGauge: number = 0;
     let ecstacyTimer:NodeJS.Timer;
+    let isEcstasyTime:boolean = false;
+    const standardDelay:number = 20000;
+    const specialDelay:number = 1000;
+    const decreaseEcstasyGauge = () => {
+        if(ecstasyGauge >= 10) {
+            ecstasyGauge -= 10;
+            chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
+        }
+        if(ecstasyGauge === 0) {
+            isEcstasyTime = false;
+            setSceneDisabled(ecstasyTrigger)
+        }
+    }
     const subscribeToChannelRedemptionAddEvents = async():Promise<void> => {
         listener.subscribeToChannelRedemptionAddEvents(userId, e => {
             console.log(`${e.redeemedAt}: ${e.userName} ${e.broadcasterName} ${e.rewardTitle}`);
+            const trigger:Trigger|undefined = triggers.get(e.rewardTitle);
+            if(trigger) tanenobFyre(trigger);
             if(e.rewardTitle.match('kimoi')) {
                 clearInterval(ecstacyTimer);
-                ecstasyGauge += 10;
+                const ectasyIncrement:number = 10;
+                ecstasyGauge += ectasyIncrement;
                 chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
-                ecstacyTimer = setInterval(()=> {
-                    if(ecstasyGauge >= 10) {
-                        ecstasyGauge -= 10;
-                        chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
-                    }
-                }, 20000)
-                if (ecstasyGauge === 100) {
+                const ectasyThreshold:number = 100;
+                if (ecstasyGauge === ectasyThreshold && !isEcstasyTime) {
+                    isEcstasyTime = true;
                     console.log('ecstasy event');
-                    ecstasyGauge = 0;
-                }
+                    clearInterval(ecstacyTimer);
+                    tanenobFyre(ecstasyTrigger);
+                } 
+
+                const delay:number = isEcstasyTime ? specialDelay : standardDelay;
+                ecstacyTimer = setInterval(decreaseEcstasyGauge, delay);
             }
 
             if(e.rewardTitle.match('トークのお題！')) {
