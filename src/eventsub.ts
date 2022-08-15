@@ -126,7 +126,9 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
                 clearInterval(ecstacyTimer);
                 const ectasyIncrement:number = 10;
                 ecstasyGauge += ectasyIncrement;
-                chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
+                const ecstasyGaugebar:number = ecstasyGauge/10;
+                const ecstasyGaugeBlank:number = 10 - (ecstasyGauge/10) >= 0 ? 10 - (ecstasyGauge/10) : 0;
+                chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGaugebar) + '░'.repeat(ecstasyGaugeBlank)} ${ecstasyGauge}%`);
                 const ectasyThreshold:number = 100;
                 if (ecstasyGauge === ectasyThreshold && !isEcstasyTime) {
                     isEcstasyTime = true;
