@@ -46,7 +46,7 @@ export const main = async()=> {
 
     // logファイル作成
     const today = new Date();
-    const logFilePath = 'log/' + today.getFullYear() + (today.getMonth() + 1) + today.getDate() + '.txt';
+    const logFilePath = 'log/' + today.getFullYear() + (today.getMonth() + 1).toString().padStart(2, '0') + today.getDate() + '.txt';
     if(!fs.existsSync(logFilePath)) {
         fs.writeFile(logFilePath, '', (err) => {
             if (err) { throw err; }

@@ -46,5 +46,9 @@ const setSceneDisabled = async (trigger:Trigger) => {
     }
 }
 
+obs.on('ConnectionClosed', () => {
+    console.log('connection closed. reconnecting...');
+	connectOBS();
+});
 
 export {connectOBS, disconnectOBS, tanenobFyre, setSceneDisabled}

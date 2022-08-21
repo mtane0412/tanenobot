@@ -103,14 +103,22 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
     }
 
     let ecstasyGauge: number = 0;
+    const ectasyIncrement:number = 10;
     let ecstacyTimer:NodeJS.Timer;
+    let showTimer:NodeJS.Timer;
+    const showDelay:number = 3000;
     let isEcstasyTime:boolean = false;
     const standardDelay:number = 20000;
     const specialDelay:number = 1000;
+    const showEcstasyGauge = () => {
+        const ecstasyGaugebar:number = ecstasyGauge/ectasyIncrement;
+        const ecstasyGaugeBlank:number = ectasyIncrement - (ecstasyGauge/ectasyIncrement) >= 0 ? ectasyIncrement - (ecstasyGauge/ectasyIncrement) : 0
+        chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGaugebar) + '░'.repeat(ecstasyGaugeBlank)} ${ecstasyGauge}%`);
+    }
     const decreaseEcstasyGauge = () => {
         if(ecstasyGauge >= 10) {
             ecstasyGauge -= 10;
-            chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGauge/10) + '░'.repeat(10 - (ecstasyGauge/10))} ${ecstasyGauge}%`);
+            showEcstasyGauge();
         }
         if(ecstasyGauge === 0) {
             isEcstasyTime = false;
@@ -124,12 +132,10 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
             if(trigger) tanenobFyre(trigger);
             if(e.rewardTitle.match('kimoi')) {
                 clearInterval(ecstacyTimer);
-                const ectasyIncrement:number = 10;
+                clearTimeout(showTimer);
                 ecstasyGauge += ectasyIncrement;
-                const ecstasyGaugebar:number = ecstasyGauge/10;
-                const ecstasyGaugeBlank:number = 10 - (ecstasyGauge/10) >= 0 ? 10 - (ecstasyGauge/10) : 0;
-                chatClient.say('#tanenob', `たねのぶエクスタシーゲージ ${'█'.repeat(ecstasyGaugebar) + '░'.repeat(ecstasyGaugeBlank)} ${ecstasyGauge}%`);
                 const ectasyThreshold:number = 100;
+                showTimer = setTimeout(showEcstasyGauge, showDelay);
                 if (ecstasyGauge === ectasyThreshold && !isEcstasyTime) {
                     isEcstasyTime = true;
                     console.log('ecstasy event');
@@ -166,7 +172,7 @@ export const subscribeEvents = async():Promise<EventSubListener> => {
                     robot.keyTap("f6", ["control", "shift"]);
                     setTimeout(()=>{
                         robot.keyTap("f1", ["control", "shift"]);
-                        chatClient.say('#tanenob', "たねのぶは恥ずかしがって葉っぱをかぶりました。");
+                        chatClient.say('#tanenob', "たねのぶはしれっと葉っぱをかぶりました。");
                     }, 600000)
                 } else {
                     chatClient.say('#tanenob', `葉っぱをかぶります`);
